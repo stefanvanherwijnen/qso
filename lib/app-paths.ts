@@ -7,14 +7,14 @@ async function getAppDir (): Promise<string> {
   let dir = process.cwd()
 
   while (dir.length && dir[dir.length - 1] !== sep) {
-    if (fs.existsSync(join(dir, 'quasar.conf.js'))) {
+    if (fs.existsSync(join(dir, 'quasar.conf.js')) || fs.existsSync(join(dir, 'quasar.conf.ts'))) {
       return dir
     }
 
     dir = normalize(join(dir, '..'))
   }
 
-  const { fatal } = await import('./helpers/logger')
+  const { fatal } = await import('@stefanvh/quasar-app-vite/lib/helpers/logger')
 
   return fatal(`Error. This command must be executed inside a Quasar v1+ project folder.`)
 }
@@ -30,7 +30,7 @@ async function getCliDir (): Promise<string> {
     dir = normalize(join(dir, '..'))
   }
 
-  const { fatal } = await import('./helpers/logger')
+  const { fatal } = await import('@stefanvh/quasar-app-vite/lib/helpers/logger')
 
   return fatal(`Error. Vite configuration file not found.`)
 } 
