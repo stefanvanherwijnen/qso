@@ -1,0 +1,1 @@
+export * from '@stefanvh/quasar-app-vite/vite-plugin-quasar'
