@@ -8,13 +8,33 @@ import { resolve } from 'path'
 
 import appPaths from '@stefanvh/quasar-app-vite/lib/app-paths'
 
+import parseArgs from 'minimist'
+const argv = parseArgs(process.argv.slice(2), {
+  alias: {
+    m: 'mode',
+    // T: 'target',
+    // A: 'arch',
+    // b: 'bundler',
+    // s: 'skip-pkg',
+    // i: 'ide',
+    // d: 'debug',
+    // h: 'help',
+    // P: 'publish'
+  },
+  // boolean: ['h', 'd', 'u', 'i'],
+  // string: ['m', 'T', 'P'],
+  default: {
+    m: 'csr'
+  }
+})
+
 const {
   appDir,
   srcDir,
   cliDir
 } = appPaths
 
-function buildQuasar (opts?: { ssr?: 'client' | 'server' }) {
+async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg' }) {
   let config: InlineConfig = {
     root: cliDir,
     plugins: [
@@ -26,6 +46,7 @@ function buildQuasar (opts?: { ssr?: 'client' | 'server' }) {
     resolve: {
       alias: [
         { find: 'src', replacement: srcDir },
+        { find: 'dist', replacement: resolve('dist') },
         { find: 'quasar', replacement: resolve(appDir, 'node_modules', 'quasar') }
       ]
     }
@@ -46,13 +67,17 @@ function buildQuasar (opts?: { ssr?: 'client' | 'server' }) {
     case 'client':
       outDir = resolve('dist', 'ssr', 'client')
       break;
+    case 'ssg':
+      outDir = resolve('dist', 'static')
+      break;
     default:
       outDir = resolve('dist', 'spa')
       break
   }
 
-  build({
+  return build({
     configFile: false,
+    // logLevel: 'silent',
     build: {
       minify: false,
       outDir,
@@ -62,10 +87,25 @@ function buildQuasar (opts?: { ssr?: 'client' | 'server' }) {
   })
 }
 
-buildQuasar({
-  ssr: 'client'
-})
-buildQuasar({
-  ssr: 'server'
-})
-buildQuasar()
+switch (argv.mode) {
+  case 'csr':
+    await buildQuasar()
+    break;
+  case 'ssr':
+    await buildQuasar({
+      ssr: 'client'
+    })
+    await buildQuasar({
+      ssr: 'server'
+    })
+    break;
+  case 'ssg':
+    console.log('Prerendering not supported yet')
+    await buildQuasar({
+      ssr: 'ssg'
+    })    
+    break;
+  default:
+    console.log('Invalid build mode')
+    break;
+}
