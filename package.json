@@ -10,6 +10,7 @@
     "./*": "./dist/src/*.js",
     "./lib/*": "./dist/lib/*.js",
     "./build": "./dist/src/node/build.js",
+    "./dev": "./dist/src/node/dev.js",
     "./help": "./dist/src/node/help.js"
   },
   "bin": {
