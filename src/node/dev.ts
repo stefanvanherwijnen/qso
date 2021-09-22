@@ -2,14 +2,18 @@ import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import express, { Express } from 'express'
 import { LogLevel, ViteDevServer } from 'vite'
-import { baseConfig } from '@stefanvh/quasar-app-vite'
+import { baseConfig, VitePlugins } from '@stefanvh/quasar-app-vite'
 import appPaths from '@stefanvh/quasar-app-vite/lib/app-paths'
 import chalk from 'chalk'
 import parseArgs from 'minimist'
+import { Plugin } from 'vite'
+
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
     m: 'mode',
+    p: 'plugins'
   },
+  string: ['m'],
   default: {
     m: 'csr'
   }
@@ -23,11 +27,13 @@ const {
 
 export async function createServer({
     logLevel,
-    mode
+    mode,
+    plugins
   }:
   {
     logLevel?: LogLevel,
-    mode?: 'csr' | 'ssr'
+    mode?: 'csr' | 'ssr',
+    plugins?: Plugin[]
   } = {
     logLevel: 'info',
     mode: 'csr'
@@ -42,7 +48,8 @@ export async function createServer({
       cliDir,
       srcDir,
       appDir,
-      ssr: mode === 'ssr' ? 'client' : undefined
+      ssr: mode === 'ssr' ? 'client' : undefined,
+      plugins
     }),
     logLevel: logLevel,
     server: mode === 'ssr' ? {
@@ -99,14 +106,21 @@ export async function createServer({
 }
 
 let app: ViteDevServer | Express
+let plugins
+if (argv.plugins) {
+  plugins = (await import(resolve(appDir, argv.plugins))).default(appPaths)
+}
 switch (argv.mode) {
   case 'ssr':
     app = await createServer({
-      mode: 'ssr'
+      mode: 'ssr',
+      plugins
     })
     break;
   default:
-    app = await createServer()
+    app = await createServer({
+      plugins
+    })
     break;
 }
 app.listen(3000)

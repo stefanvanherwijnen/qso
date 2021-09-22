@@ -1,9 +1,11 @@
 import App from 'src/App.vue'
-import { createRouter } from 'src/router'
+import createRouter from 'src/router'
 
 import { createSSRApp, createApp as createVueApp } from 'vue'
 // import Dialog from 'quasar/src/plugins/Dialog.js'
 import QuasarPlugin from 'quasar/src/vue-plugin'
+import QuasarConf from 'quasarConf'
+
 // import iconSet from 'quasar/icon-set/material-icons'
 // import { ApolloClients } from '@vue/apollo-composable'
 // import { createApolloClient } from './apollo'
@@ -41,6 +43,37 @@ interface ssrContext {
   [key: string]: unknown
 }
 
+let quasarConf
+const ctx = {
+  prod: import.meta.env.PROD,
+  mode: {
+    ssr: import.meta.env.SSR
+  }
+}
+if (typeof QuasarConf === "function") {
+  quasarConf = QuasarConf(ctx)
+} else {
+  quasarConf = QuasarConf
+}
+
+
+let quasarPlugins = {}
+if (quasarConf.framework?.plugins) {
+  const quasar = await import('quasar')
+  for (let plugin of quasarConf.framework?.plugins) {
+    quasarPlugins[plugin] = quasar[plugin]
+  }
+}
+
+
+if (quasarConf.extras) {
+  for (let asset of quasarConf.extras) {
+    console.log(asset)
+    import(`./node_modules/@quasar/extras/${asset}/${asset}.css`)
+  }
+  // importExtras(quasarConf.extras)
+}
+
 const bootFiles = import.meta.glob('./src/boot/*.(js|ts)')
 console.log(bootFiles)
 export function createApp(ssrContext?: ssrContext) {
@@ -51,6 +84,8 @@ export function createApp(ssrContext?: ssrContext) {
     app = createVueApp(App)
   }
   const router = createRouter()
+
+
   // app.use(Quasar, {}, ssrContext)
 
   // Apollo
@@ -67,9 +102,8 @@ export function createApp(ssrContext?: ssrContext) {
   // installPlugins({}, autoInstalledPlugins)
 
   app.use(QuasarPlugin, {
-    plugins: {
-      // Dialog
-    }
+    plugins: Object.values(quasarPlugins),
+
   }, ssrContext)
   // app.use(Quasar, {
   //   components,
