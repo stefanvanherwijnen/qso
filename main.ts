@@ -5,7 +5,7 @@ import { createSSRApp, createApp as createVueApp } from 'vue'
 // import Dialog from 'quasar/src/plugins/Dialog.js'
 import QuasarPlugin from 'quasar/src/vue-plugin'
 import QuasarConf from 'quasarConf'
-
+import * as directives from 'quasar/src/directives'
 // import iconSet from 'quasar/icon-set/material-icons'
 // import { ApolloClients } from '@vue/apollo-composable'
 // import { createApolloClient } from './apollo'
@@ -68,8 +68,7 @@ if (quasarConf.framework?.plugins) {
 
 if (quasarConf.extras) {
   for (let asset of quasarConf.extras) {
-    console.log(asset)
-    import(`./node_modules/@quasar/extras/${asset}/${asset}.css`)
+    await import(`/node_modules/@quasar/extras/${asset}/${asset}.css`)
   }
   // importExtras(quasarConf.extras)
 }
@@ -103,7 +102,7 @@ export function createApp(ssrContext?: ssrContext) {
 
   app.use(QuasarPlugin, {
     plugins: Object.values(quasarPlugins),
-
+    directives
   }, ssrContext)
   // app.use(Quasar, {
   //   components,

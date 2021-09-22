@@ -52,15 +52,21 @@ export async function createServer({
       plugins
     }),
     logLevel: logLevel,
-    server: mode === 'ssr' ? {
-      middlewareMode: 'ssr',
+    server: {
+      middlewareMode:  mode === 'ssr' ? 'ssr' : undefined,
+      fs: {
+        allow: [
+          './',
+          resolve(appDir),
+        ]
+      },
       watch: {
         // During tests we edit the files too fast and sometimes chokidar
         // misses change events, so enforce polling for consistency
         usePolling: true,
         interval: 100
-      }
-    } : undefined
+      },
+    }
   })
   let app
   if (mode === 'ssr') {

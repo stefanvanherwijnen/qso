@@ -37,7 +37,7 @@ export const baseConfig = ({
           { find: 'src', replacement: srcDir },
           { find: 'dist', replacement: resolve('dist') },
           { find: 'quasar', replacement: resolve(appDir, 'node_modules', 'quasar') },
-          { find: '@quasar/extras', replacement: resolve(appDir, 'node_modules', '@quasar', 'extras') },
+          // { find: '@quasar/extras', replacement: resolve(appDir, 'node_modules', '@quasar', 'extras') },
           { find: 'quasarConf', replacement: resolve(appDir, 'quasar.conf')}
         ]
       },
