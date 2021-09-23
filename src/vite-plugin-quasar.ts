@@ -14,7 +14,6 @@ const additionalDataSass = `@import 'quasar/src/css/helpers/string.sass'
 @import 'quasar/src/css/helpers/math.sass'
 @import 'quasar/src/css/variables.sass'
 @import 'quasar/src/css/normalize.sass'
-@import 'quasar/src/components/icon/QIcon.sass'
 @import 'quasar/src/css/core/animations.sass'
 @import 'quasar/src/css/core/colors.sass'
 @import 'quasar/src/css/core/elevation.sass'
@@ -29,6 +28,13 @@ const additionalDataSass = `@import 'quasar/src/css/helpers/string.sass'
 @import 'quasar/src/css/core/typography.sass'
 @import 'quasar/src/css/core/visibility.sass'
 @import 'quasar/src/css/core/dark.sass'
+/* Directives */
+@import 'quasar/src/directives/Ripple.sass'
+@import 'quasar/src/directives/Morph.sass'
+
+/* Plugins */
+@import 'quasar/src/plugins/Loading.sass'
+@import 'quasar/src/plugins/Notify.sass'
 `
 
 // Should be an argument to the plugin

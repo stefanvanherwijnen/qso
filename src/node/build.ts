@@ -1,12 +1,9 @@
 #!/usr/bin/node --experimental-specifier-resolution=node
-
-import { build, InlineConfig } from 'vite'
-import vuePlugin from '@vitejs/plugin-vue'
-// import QuasarPlugin from '../vite-plugin-quasar'
-import { QuasarPlugin } from '@stefanvh/quasar-app-vite'
+import { build } from 'vite'
 import { resolve } from 'path'
 
 import appPaths from '@stefanvh/quasar-app-vite/lib/app-paths'
+import { baseConfig } from '@stefanvh/quasar-app-vite'
 
 import parseArgs from 'minimist'
 const argv = parseArgs(process.argv.slice(2), {
@@ -35,43 +32,25 @@ const {
 } = appPaths
 
 async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg' }) {
-  let config: InlineConfig = {
-    root: cliDir,
-    plugins: [
-      vuePlugin(),
-      QuasarPlugin({
-        ssr: opts?.ssr
-      })
-    ],
-    resolve: {
-      alias: [
-        { find: 'src', replacement: srcDir },
-        { find: 'dist', replacement: resolve('dist') },
-        { find: 'quasar', replacement: resolve(appDir, 'node_modules', 'quasar') }
-      ]
-    }
-  }
+  let config = baseConfig({
+    cliDir,
+    appDir,
+    srcDir,
+    ssr: opts?.ssr })
 
   let outDir
   switch (opts?.ssr) {
     case 'server':
       outDir = resolve(appDir, 'dist', 'ssr', 'server')
-      config = {
-        ...config,
-        // @ts-ignore
-        ssr: {
-          noExternal: ['quasar']
-        }
-      }
       break;
     case 'client':
-      outDir = resolve('dist', 'ssr', 'client')
+      outDir = resolve(appDir, 'dist', 'ssr', 'client')
       break;
     case 'ssg':
-      outDir = resolve('dist', 'static')
+      outDir = resolve(appDir, 'dist', 'static')
       break;
     default:
-      outDir = resolve('dist', 'spa')
+      outDir = resolve(appDir, 'dist', 'spa')
       break
   }
 

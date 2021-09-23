@@ -3,9 +3,13 @@
 This package aims to be a [Vite](https://vitejs.dev) based alternative for [@quasar/app](https://github.com/quasarframework/quasar/tree/dev/app).
 
 ## Install
-`yarn add --dev @stefanvh/quasar-app-vite`
+```
+yarn add --dev @stefanvh/quasar-app-vite
+```
 or
-`npm install --save-dev @stefanvh/quasar-app-vite`
+```
+npm install --save-dev @stefanvh/quasar-app-vite
+```
 
 ## Example
 Clone the example folder for a minimal working example.
@@ -15,10 +19,13 @@ Clone the example folder for a minimal working example.
 Use `yarn run` or `npx`:
 
 - `quasar-vite build`: Build your Quasar project and output to `dist/`
+- `quasar-vite dev`: Spin up a development server
 
 ### Quasar Vite plugin
 You can also use the Vite plugin directly in your Vite config:
-`import { QuasarPlugin } from '@stefanvh/quasar-app-vite'` 
+```js
+import { QuasarPlugin } from '@stefanvh/quasar-app-vite'
+``` 
 
 ## Features
 - Pure ESM package
@@ -26,8 +33,12 @@ You can also use the Vite plugin directly in your Vite config:
 - Auto-import of components and SASS (no need to import non tree shakeable CSS)
 - Support for SPA and SSR builds with PWA as option for both
 
+## Development project
+A modified [Quasar UI dev project](https://github.com/quasarframework/quasar/tree/dev/ui/dev) can be found under [dev](./dev). There is a lot to be tested, so any extra help would be appreciated :smile:.
 ## Known issues
 - [SSR mode](https://vitejs.dev/guide/ssr.html) is still experimental and has some problems
   - SSR builds use `require()` at runtime, which makes it impossible to import ESM files from node_modules. For this reason `noExternal: [ 'quasar']` has to be used which means that all source code will be compiled to CJS which leads to longer build times
+  - The dev server does not support injecting CSS (https://github.com/vitejs/vite/issues/2282).
 - This package is an ES Module. Support for ESM in Node is partly experimental which means that any number of errors may occur (although everything seems to work at the moment)
+- @quasar/app inserts any semi-dynamic imports (e.g. plugins, boot files, extras etc) at build time as static imports. Right now, anything defined in quasar.conf is imported dynamically with non-variable strings ([quasar-extras.ts](./quasar-extras.ts) and [quasar-plugins.ts](./quasar-plugins.ts)), but there might be a better solution for dynamic ESM imports.
 - Quasar is packed with features and there is still a long way to go to port everything to Vite.
