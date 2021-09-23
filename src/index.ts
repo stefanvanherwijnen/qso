@@ -35,9 +35,10 @@ export const baseConfig = ({
       resolve: {
         alias: [
           { find: 'src', replacement: srcDir },
+          { find: 'boot', replacement: resolve(srcDir, 'boot') },
           { find: 'dist', replacement: resolve('dist') },
           { find: 'quasar', replacement: resolve(appDir, 'node_modules', 'quasar') },
-          // { find: '@quasar/extras', replacement: resolve(appDir, 'node_modules', '@quasar', 'extras') },
+          { find: '@quasar/extras', replacement: resolve(appDir, 'node_modules', '@quasar', 'extras') },
           { find: 'quasarConf', replacement: resolve(appDir, 'quasar.conf')}
         ]
       },

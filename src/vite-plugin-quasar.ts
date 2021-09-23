@@ -28,6 +28,13 @@ const additionalDataSass = `@import 'quasar/src/css/helpers/string.sass'
 @import 'quasar/src/css/core/typography.sass'
 @import 'quasar/src/css/core/visibility.sass'
 @import 'quasar/src/css/core/dark.sass'
+/* Directives */
+@import 'quasar/src/directives/Ripple.sass'
+@import 'quasar/src/directives/Morph.sass'
+
+/* Plugins */
+@import 'quasar/src/plugins/Loading.sass'
+@import 'quasar/src/plugins/Notify.sass'
 `
 
 // Should be an argument to the plugin

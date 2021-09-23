@@ -1,5 +1,5 @@
 import pages from './pages-list'
-console.log(pages)
+
 function load (component) {
   return () => import('../pages/' + component + '.vue')
 }

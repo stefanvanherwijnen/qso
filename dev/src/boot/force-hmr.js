@@ -10,3 +10,7 @@ import * as plugins from 'quasar/src/plugins.js'
 import * as utils from 'quasar/src/utils.js'
 
 console.log('Quasar:', components, directives, plugins, utils)
+
+export default function () {
+    console.log('boot test')
+}

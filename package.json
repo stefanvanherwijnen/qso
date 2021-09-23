@@ -17,7 +17,6 @@
     "quasar-vite": "./dist/src/node/quasar-vite.js"
   },
   "devDependencies": {
-    "@quasar/extras": "^1.11.0",
     "@types/express": "^4.17.13",
     "@types/glob": "^7.1.4",
     "@vitejs/plugin-vue": "^1.0.0",

@@ -2,47 +2,19 @@ import App from 'src/App.vue'
 import createRouter from 'src/router'
 
 import { createSSRApp, createApp as createVueApp } from 'vue'
-// import Dialog from 'quasar/src/plugins/Dialog.js'
 import QuasarPlugin from 'quasar/src/vue-plugin'
 import QuasarConf from 'quasarConf'
 import * as directives from 'quasar/src/directives'
-// import iconSet from 'quasar/icon-set/material-icons'
-// import { ApolloClients } from '@vue/apollo-composable'
-// import { createApolloClient } from './apollo'
-// import { ApolloClient, NormalizedCacheObject } from '@apollo/client/core'
-
-// import Screen from 'quasar/src/plugins/Screen.js'
-// import Dark from 'quasar/src/plugins/Dark.js'
-// import History from 'quasar/src/history.js'
-// import Lang from 'quasar/src/lang.js'
-// import Body from 'quasar/src/body.js'
-// import IconSet from 'quasar/src/icon-set.js'
-
-// const autoInstalledPlugins = [
-//   Platform,
-//   Body,
-//   Dark,
-//   Screen,
-//   History,
-//   Lang,
-//   IconSet
-// ]
-
-// function installPlugins (pluginOpts, pluginList) {
-//   pluginList.forEach(Plugin => {
-//     Plugin.install(pluginOpts)
-//     Plugin.__installed = true
-//   })
-// }
-// SSR requires a fresh app instance per request, therefore we export a function
-// that creates a fresh app instance. If using Vuex, we'd also be creating a
-// fresh store here.
+import { importQuasarExtras } from './quasar-extras'
+import boot from 'boot'
+import { importQuasarPlugins } from './quasar-plugins'
 
 interface ssrContext {
   ssr: boolean
   [key: string]: unknown
 }
 
+// Retrieve Quasar config
 let quasarConf
 const ctx = {
   prod: import.meta.env.PROD,
@@ -56,25 +28,42 @@ if (typeof QuasarConf === "function") {
   quasarConf = QuasarConf
 }
 
-
+// Import Quasar plugins
 let quasarPlugins = {}
 if (quasarConf.framework?.plugins) {
-  const quasar = await import('quasar')
-  for (let plugin of quasarConf.framework?.plugins) {
-    quasarPlugins[plugin] = quasar[plugin]
-  }
+  const pluginsImports = Object.entries(importQuasarPlugins).filter(([key, value]) => quasarConf.framework.plugins.includes(key)).reduce(
+    (acc, [key, value]) => {
+      const promise = value()
+      acc.push(promise)
+      return acc
+  }, [])
+  quasarPlugins = await Promise.all(pluginsImports).then((arr) => arr.map(plugin => plugin.default))
 }
 
-
+// Import @quasar/extras
 if (quasarConf.extras) {
-  for (let asset of quasarConf.extras) {
-    await import(`/node_modules/@quasar/extras/${asset}/${asset}.css`)
-  }
-  // importExtras(quasarConf.extras)
+  Object.entries(importQuasarExtras).filter(([key, value]) => quasarConf.extras.includes(key)).forEach(([key, value]) => value())
 }
 
-const bootFiles = import.meta.glob('./src/boot/*.(js|ts)')
-console.log(bootFiles)
+// Run boot files
+if (quasarConf.boot) {
+  quasarConf.boot = quasarConf.boot
+    .filter(entry => {
+      if (typeof entry === 'object') return import.meta.env.SSR === entry.server
+      else if (entry !== '') return true
+    })
+    .map(entry => {
+      if (typeof entry === 'string') return entry
+      else if (typeof entry === 'object') return entry.path
+    })
+
+  Object.entries(boot).filter(([key]) => quasarConf.boot.includes(key.slice(2).split('.')[0])).forEach(([key, bootImport]) => {
+    bootImport().then((module) => {
+      if (module.default) module.default()
+    })
+  })
+}
+
 export function createApp(ssrContext?: ssrContext) {
   let app
   if (import.meta.env.SSR) {
@@ -84,33 +73,11 @@ export function createApp(ssrContext?: ssrContext) {
   }
   const router = createRouter()
 
-
-  // app.use(Quasar, {}, ssrContext)
-
-  // Apollo
-  // let ctx
-  // let apolloClients: Record<string, ApolloClient<NormalizedCacheObject>> = {}
-  // if (import.meta.env.SSR) {
-  //   apolloClients.default = createApolloClient()
-  // } else {
-  //   console.log(window.__APOLLO_STATE__)
-  //   apolloClients.default = createApolloClient(window.__APOLLO_STATE__?.default)
-  // }
-  // app.provide(ApolloClients, apolloClients)
-  
-  // installPlugins({}, autoInstalledPlugins)
-
   app.use(QuasarPlugin, {
-    plugins: Object.values(quasarPlugins),
+    plugins: quasarPlugins,
     directives
   }, ssrContext)
-  // app.use(Quasar, {
-  //   components,
-  //   plugins: {
-  //     Dialog
-  //   },
-  //   // iconSet: iconSet
-  // }, ssrContext)
+
   app.use(router)
   return { app, router }
 }
