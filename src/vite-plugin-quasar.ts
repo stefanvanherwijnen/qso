@@ -40,7 +40,7 @@ const additionalDataSass = `@import 'quasar/src/css/helpers/string.sass'
 // Should be an argument to the plugin
 export interface Configuration {
   pwa?: VitePWAOptions,
-  ssr?: 'server' | 'client'
+  ssr?: 'server' | 'client' | 'ssg'
 }
 
 export const QuasarPlugin = (configuration?: Configuration): Plugin[] => {
