@@ -3,7 +3,7 @@
 // require('../lib/node-version-check')
 // require('../lib/helpers/cli-error-handling')
 export {}
-
+import { warn } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
 const commands = [
   // 'dev',
   'build',
@@ -46,8 +46,6 @@ if (cmd) {
       console.log(require('../package.json').version)
       process.exit(0)
     }
-
-    const { log, warn } = await import('@stefanvh/quasar-app-vite/lib/helpers/logger')
 
     if (cmd === '-h' || cmd === '--help') {
       cmd = 'help'

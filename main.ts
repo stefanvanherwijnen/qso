@@ -8,7 +8,7 @@ import * as directives from 'quasar/src/directives'
 import { importQuasarExtras } from './quasar-extras'
 import boot from 'boot'
 import { importQuasarPlugins } from './quasar-plugins'
-
+import extensionRunner from '@stefanvh/quasar-app-vite/lib/app-extension/extensions-runner'
 interface ssrContext {
   ssr: boolean
   [key: string]: unknown
@@ -63,6 +63,9 @@ if (quasarConf.boot) {
     })
   })
 }
+
+// App extensions
+await extensionRunner.registerExtensions(ctx)
 
 export function createApp(ssrContext?: ssrContext) {
   let app

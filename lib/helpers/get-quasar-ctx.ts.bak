@@ -1,0 +1,47 @@
+interface Options {
+  dev: boolean,
+  prod: boolean,
+  mode: string,
+  emulator: string,
+  bundler: string,
+  target: string,
+  arch: string,
+  debug?: boolean,
+  publish?: boolean,
+  vueDevTools?: boolean
+}
+export default function (opts: Options) {
+    const ctx = {
+      dev: opts.dev || false,
+      prod: opts.prod || false,
+      mode: {},
+      modeName: opts.mode,
+      target: {},
+      targetName: opts.target,
+      emulator: opts.emulator,
+      arch: {},
+      archName: opts.arch,
+      bundler: {},
+      bundlerName: opts.bundler,
+      debug: opts.debug || false,
+      publish: opts.publish,
+      vueDevtools: opts.vueDevtools || false
+    }
+  
+    ctx.mode[opts.mode] = true
+  
+    if (opts.target) {
+      ctx.target[opts.target] = true
+    }
+  
+    if (opts.arch) {
+      ctx.arch[opts.arch] = true
+    }
+  
+    if (opts.bundler) {
+      ctx.bundler[opts.bundler] = true
+    }
+  
+    return ctx
+  }
+  
