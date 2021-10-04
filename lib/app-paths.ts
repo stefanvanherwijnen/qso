@@ -37,7 +37,6 @@ async function getCliDir (): Promise<string> {
 
 const appDir = await getAppDir()
 const cliDir = await getCliDir()
-console.log(cliDir)
 const srcDir = resolve(appDir, 'src')
 const pwaDir = resolve(appDir, 'src-pwa')
 const ssrDir = resolve(appDir, 'src-ssr')

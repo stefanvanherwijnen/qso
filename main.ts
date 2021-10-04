@@ -3,7 +3,7 @@ import createRouter from 'src/router'
 
 import { createSSRApp, createApp as createVueApp } from 'vue'
 import QuasarPlugin from 'quasar/src/vue-plugin'
-import QuasarConf from 'quasarConf'
+// import QuasarConf from 'quasarConf'
 import * as directives from 'quasar/src/directives'
 import { importQuasarExtras } from './quasar-extras'
 import boot from 'boot'
@@ -15,18 +15,21 @@ interface ssrContext {
 }
 
 // Retrieve Quasar config
-let quasarConf
+// let quasarConf
 const ctx = {
   prod: import.meta.env.PROD,
   mode: {
     ssr: import.meta.env.SSR
   }
 }
-if (typeof QuasarConf === "function") {
-  quasarConf = QuasarConf(ctx)
-} else {
-  quasarConf = QuasarConf
-}
+// if (typeof QuasarConf === "function") {
+//   quasarConf = QuasarConf(ctx)
+// } else {
+//   quasarConf = QuasarConf
+// }
+const quasarConf = (await import('@stefanvh/quasar-app-vite/lib/quasar-conf-file')).quasarConf(ctx)
+console.log(quasarConf)
+
 
 // Import Quasar plugins
 let quasarPlugins = {}
@@ -36,7 +39,7 @@ if (quasarConf.framework?.plugins) {
       const promise = value()
       acc.push(promise)
       return acc
-  }, [])
+    }, [])
   quasarPlugins = await Promise.all(pluginsImports).then((arr) => arr.map(plugin => plugin.default))
 }
 
@@ -44,6 +47,9 @@ if (quasarConf.framework?.plugins) {
 if (quasarConf.extras) {
   Object.entries(importQuasarExtras).filter(([key, value]) => quasarConf.extras.includes(key)).forEach(([key, value]) => value())
 }
+
+// App extensions
+// await extensionRunner.registerExtensions(ctx)
 
 // Run boot files
 if (quasarConf.boot) {
@@ -64,10 +70,7 @@ if (quasarConf.boot) {
   })
 }
 
-// App extensions
-await extensionRunner.registerExtensions(ctx)
-
-export function createApp(ssrContext?: ssrContext) {
+export function createApp (ssrContext?: ssrContext) {
   let app
   if (import.meta.env.SSR) {
     app = createSSRApp(App)

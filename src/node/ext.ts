@@ -47,14 +47,14 @@ if (argv._.length !== 0 && argv._.length !== 2) {
 }
 
 async function run (action: string, name: string) {
-  const Extension = (await import('@stefanvh/quasar-app-vite/lib/app-extension/Extenson')).default
+  const Extension = (await import('@stefanvh/quasar-app-vite/lib/app-extension/Extension')).default
   const extension = new Extension(name)
 
   await extension[
     action === 'add' || action === 'invoke'
       ? 'install'
       : 'uninstall'
-    ](action === 'invoke' || action === 'uninvoke')
+  ](action === 'invoke' || action === 'uninvoke')
 }
 
 if (argv._.length === 0) {
@@ -62,7 +62,7 @@ if (argv._.length === 0) {
   extensionJson.list()
 }
 else {
-  const [ action, name ] = argv._
+  const [action, name] = argv._
 
   if (!['add', 'remove', 'invoke', 'uninvoke'].includes(action)) {
     console.log()

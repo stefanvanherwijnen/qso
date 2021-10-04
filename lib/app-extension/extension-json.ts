@@ -7,7 +7,7 @@ const extensionPath = appPaths.resolve.app('quasar.extensions.json')
 
 class ExtensionJson {
   extensions: Record<string, any> = {}
-  constructor () {
+  constructor() {
     try {
       this.extensions = fs.readFileSync(extensionPath).toJSON()
     }
