@@ -33,11 +33,10 @@ async function getCliDir (): Promise<string> {
   const { fatal } = await import('@stefanvh/quasar-app-vite/lib/helpers/logger')
 
   return fatal(`Error. Vite configuration file not found.`)
-} 
+}
 
 const appDir = await getAppDir()
 const cliDir = await getCliDir()
-console.log(cliDir)
 const srcDir = resolve(appDir, 'src')
 const pwaDir = resolve(appDir, 'src-pwa')
 const ssrDir = resolve(appDir, 'src-ssr')
