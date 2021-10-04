@@ -7,6 +7,10 @@ const {
   bgYellow, yellow
 } = chalk
 import readline from 'readline'
+import { AddressInfo, Server } from 'net'
+import { ResolvedConfig, Logger } from 'vite'
+import os from 'os'
+import { resolveHostname, Hostname } from '@stefanvh/quasar-app-vite/lib/helpers/utils'
 
 /**
  * Main approach - App CLI related
@@ -20,13 +24,13 @@ const yellowBanner = yellow(banner)
 
 export const clearConsole = process.stdout.isTTY
   ? () => {
-      // Fill screen with blank lines. Then move to 0 (beginning of visible part) and clear it
-      const blank = '\n'.repeat(process.stdout.rows)
-      console.log(blank)
-      readline.cursorTo(process.stdout, 0, 0)
-      readline.clearScreenDown(process.stdout)
-    }
-  : () => {}
+    // Fill screen with blank lines. Then move to 0 (beginning of visible part) and clear it
+    const blank = '\n'.repeat(process.stdout.rows)
+    console.log(blank)
+    readline.cursorTo(process.stdout, 0, 0)
+    readline.clearScreenDown(process.stdout)
+  }
+  : () => { }
 
 export const log = function (msg: string) {
   console.log(msg ? ` ${greenBanner} ${msg}` : '')
@@ -95,4 +99,52 @@ export const warning = function (msg: string, title = 'WARNING') {
 }
 export const getWarning = function (msg: string, title = 'WARNING') {
   return ` ${yellowBanner} ${warningPill(title)} ${yellow(dot + ' ' + msg)}`
+}
+
+export function printHttpServerUrls (
+  server: Server,
+  config: ResolvedConfig
+): void {
+  const address = server.address()
+  const isAddressInfo = (x: any): x is AddressInfo => x?.address
+  if (isAddressInfo(address)) {
+    const hostname = resolveHostname(config.server.host)
+    const protocol = config.server.https ? 'https' : 'http'
+    printServerUrls(
+      hostname,
+      protocol,
+      address.port,
+      config.base,
+      config.logger.info
+    )
+  }
+}
+
+function printServerUrls (
+  hostname: Hostname,
+  protocol: string,
+  port: number,
+  base: string,
+  info: Logger['info']
+): void {
+  if (hostname.host === '127.0.0.1') {
+    const url = `${protocol}://${hostname.name}:${chalk.bold(port)}${base}`
+    info(`  > Local: ${chalk.cyan(url)}`)
+    if (hostname.name !== '127.0.0.1') {
+      info(`  > Network: ${chalk.dim('use `--host` to expose')}`)
+    }
+  } else {
+    Object.values(os.networkInterfaces())
+      .flatMap((nInterface) => nInterface ?? [])
+      .filter((detail) => detail && detail.address && detail.family === 'IPv4')
+      .map((detail) => {
+        const type = detail.address.includes('127.0.0.1')
+          ? 'Local:   '
+          : 'Network: '
+        const host = detail.address.replace('127.0.0.1', hostname.name)
+        const url = `${protocol}://${host}:${chalk.bold(port)}${base}`
+        return `  > ${type} ${chalk.cyan(url)}`
+      })
+      .forEach((msg) => info(msg))
+  }
 }

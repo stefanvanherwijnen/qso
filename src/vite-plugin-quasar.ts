@@ -46,8 +46,8 @@ export interface Configuration {
 export const QuasarPlugin = (configuration?: Configuration): Plugin[] => {
   const extraPlugins: Plugin[] = []
   if (configuration?.pwa) extraPlugins.push(
-      ...VitePWA(configuration.pwa)
-    )
+    ...VitePWA(configuration.pwa)
+  )
 
   return [
     {
@@ -82,8 +82,8 @@ export const QuasarPlugin = (configuration?: Configuration): Plugin[] => {
               return {
                 path: `quasar/${importMap[name].file}`,
                 sideEffects
-              }     
-            }        
+              }
+            }
           }
         }
       ]
@@ -91,7 +91,7 @@ export const QuasarPlugin = (configuration?: Configuration): Plugin[] => {
     {
       name: 'vite-plugin-quasar',
       enforce: 'pre',
-      transform(code, id, ssr) {
+      transform (code, id, ssr) {
         // Required for the ssr argument during ssr builds (combined config for server and client)
         code = code.replace(/__QUASAR_VERSION__/g, `'version'`)
           .replace(/__QUASAR_SSR__/g, (!!ssr).toString())
@@ -120,7 +120,7 @@ export const QuasarPlugin = (configuration?: Configuration): Plugin[] => {
           },
           css: {
             preprocessorOptions: {
-              sass: { 
+              sass: {
                 additionalData: additionalDataSass
               }
             },

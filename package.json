@@ -17,8 +17,6 @@
     "quasar-vite": "./dist/src/node/quasar-vite.js"
   },
   "dependencies": {
-    "@types/express": "^4.17.13",
-    "@types/glob": "^7.1.4",
     "@vitejs/plugin-vue": "^1.9.2",
     "@vitejs/plugin-vue-jsx": "^1.2.0",
     "@vue/compiler-sfc": "^3.2.19",
@@ -38,6 +36,11 @@
     "vue-router": "4.0.11",
     "workbox-build": "^6.3.0",
     "workbox-window": "^6.3.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/glob": "^7.1.4",
+    "@types/minimist": "^1.2.2"
   },
   "publishConfig": {
     "access": "public",

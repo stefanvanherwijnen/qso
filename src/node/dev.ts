@@ -2,11 +2,12 @@ import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import express, { Express } from 'express'
 import { LogLevel, ViteDevServer } from 'vite'
+import { printHttpServerUrls, log } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
 import { baseConfig, VitePlugins } from '@stefanvh/quasar-app-vite'
 import appPaths from '@stefanvh/quasar-app-vite/lib/app-paths'
-import chalk from 'chalk'
 import parseArgs from 'minimist'
 import { Plugin } from 'vite'
+import { Server } from 'net'
 
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
@@ -28,21 +29,23 @@ const {
 } = appPaths
 
 export async function createServer ({
+  port,
   logLevel,
   mode,
   plugins,
   host
 }:
   {
+    port?: number,
     logLevel?: LogLevel,
     mode?: 'csr' | 'ssr',
     plugins?: Plugin[],
     host?: boolean
   } = {
+    port: 3000,
     logLevel: 'info',
     mode: 'csr'
   }) {
-  console.log(typeof host)
   /**
    * @type {import('vite').ViteDevServer}
    */
@@ -56,12 +59,13 @@ export async function createServer ({
       ssr: mode === 'ssr' ? 'client' : undefined,
       plugins
     }),
-    logLevel: logLevel,
+    logLevel,
     server: {
+      port,
       middlewareMode: mode === 'ssr' ? 'ssr' : undefined,
       fs: {
         allow: [
-          './',
+          resolve(cliDir),
           resolve(appDir),
         ]
       },
@@ -74,8 +78,10 @@ export async function createServer ({
       host
     }
   })
-  let app
+  let app: ViteDevServer | Express
+  let server: Server
   if (mode === 'ssr') {
+    console.log('SSR mode')
     app = express()
     app.use(vite.middlewares)
 
@@ -109,31 +115,34 @@ export async function createServer ({
         res.status(500).end((e as Error).stack)
       }
     })
+    server = await app.listen()
   } else {
-    app = vite
+    server = (await vite.listen()).httpServer as Server
   }
-  return app
+  return { server, vite }
 
 }
 
-let app: ViteDevServer | Express
+let server: Server
+let vite: ViteDevServer
 let plugins
 if (argv.plugins) {
   plugins = (await import(resolve(appDir, argv.plugins))).default(appPaths)
 }
 switch (argv.mode) {
   case 'ssr':
-    app = await createServer({
+    ({ server, vite } = await createServer({
       mode: 'ssr',
       plugins,
       host: argv.host
-    })
+    }))
     break;
   default:
-    app = await createServer({
+    ({ server, vite } = await createServer({
       plugins,
       host: argv.host
-    })
+    }))
     break;
 }
-app.listen(3000)
+log('Dev server running at:')
+printHttpServerUrls(server, vite.config)
