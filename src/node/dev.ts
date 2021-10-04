@@ -11,11 +11,13 @@ import { Plugin } from 'vite'
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
     m: 'mode',
-    p: 'plugins'
+    p: 'plugins',
+    h: 'host'
   },
-  string: ['m'],
+  string: ['m', 'host'],
   default: {
-    m: 'csr'
+    m: 'csr',
+    h: false
   }
 })
 
@@ -25,19 +27,22 @@ const {
   cliDir
 } = appPaths
 
-export async function createServer({
-    logLevel,
-    mode,
-    plugins
-  }:
+export async function createServer ({
+  logLevel,
+  mode,
+  plugins,
+  host
+}:
   {
     logLevel?: LogLevel,
     mode?: 'csr' | 'ssr',
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    host?: boolean
   } = {
     logLevel: 'info',
     mode: 'csr'
   }) {
+  console.log(typeof host)
   /**
    * @type {import('vite').ViteDevServer}
    */
@@ -53,7 +58,7 @@ export async function createServer({
     }),
     logLevel: logLevel,
     server: {
-      middlewareMode:  mode === 'ssr' ? 'ssr' : undefined,
+      middlewareMode: mode === 'ssr' ? 'ssr' : undefined,
       fs: {
         allow: [
           './',
@@ -66,6 +71,7 @@ export async function createServer({
         usePolling: true,
         interval: 100
       },
+      host
     }
   })
   let app
@@ -76,7 +82,7 @@ export async function createServer({
     app.use('*', async (req, res) => {
       try {
         const url = req.originalUrl
-  
+
         let template
         let render
         const ssrContext = {
@@ -92,18 +98,17 @@ export async function createServer({
         render = (await vite.ssrLoadModule(entryUrl)).render
 
         const [appHtml, preloadLinks] = await render(url, {}, ssrContext)
-        console.log(preloadLinks)
         const html = template
           .replace(`<!--preload-links-->`, preloadLinks)
           .replace(`<!--app-html-->`, appHtml)
-  
+
         res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
       } catch (e) {
-        vite && vite.ssrFixStacktrace(e)
-        console.log(e.stack)
-        res.status(500).end(e.stack)
+        vite && vite.ssrFixStacktrace(e as Error)
+        console.log((e as Error).stack)
+        res.status(500).end((e as Error).stack)
       }
-    })  
+    })
   } else {
     app = vite
   }
@@ -120,12 +125,14 @@ switch (argv.mode) {
   case 'ssr':
     app = await createServer({
       mode: 'ssr',
-      plugins
+      plugins,
+      host: argv.host
     })
     break;
   default:
     app = await createServer({
-      plugins
+      plugins,
+      host: argv.host
     })
     break;
 }
