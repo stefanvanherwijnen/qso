@@ -7,9 +7,12 @@
   resolved "https://registry.yarnpkg.com/@quasar/extras/-/extras-1.11.0.tgz#dca867bc3748047d8730f94b13492a39af51a9ce"
   integrity sha512-Uyi2U4XFmpqa+46MJCG2zP5SCjeLRZYx9DkfK5wHNyUYryUJ8t4P1DaAvdYPoPYGG7uyPLL+2pF83rMHHUiokA==
 
-"@stefanvh/quasar-app-vite@link:..":
-  version "0.0.0"
-  uid ""
+"@stefanvh/quasar-app-vite@^0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@stefanvh/quasar-app-vite/-/quasar-app-vite-0.2.3.tgz#02b3626b43fdd044db6e02bdc71cc44a759e3395"
+  integrity sha512-y4rC/WBOz+PnaV5XBkNfwzNaQPhoPsHfFa1mNXfldusTVy8iaoiNleemQA3xDIMiLJhQFGYsDmmBAezk4U4LTw==
+  dependencies:
+    minimist "^1.2.5"
 
 minimist@^1.2.5:
   version "1.2.5"
