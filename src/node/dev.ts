@@ -4,7 +4,7 @@ import express, { Express } from 'express'
 import { LogLevel, ViteDevServer } from 'vite'
 import { printHttpServerUrls, log } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
 import { baseConfig, VitePlugins } from '@stefanvh/quasar-app-vite'
-import appPaths from '@stefanvh/quasar-app-vite/lib/app-paths'
+import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
 import parseArgs from 'minimist'
 import { Plugin } from 'vite'
 import { Server } from 'net'
@@ -22,43 +22,39 @@ const argv = parseArgs(process.argv.slice(2), {
   }
 })
 
-const {
-  appDir,
-  srcDir,
-  cliDir
-} = appPaths
-
 export async function createServer ({
   port,
   logLevel,
   mode,
-  plugins,
   host
 }:
   {
     port?: number,
     logLevel?: LogLevel,
     mode?: 'csr' | 'ssr',
-    plugins?: Plugin[],
     host?: boolean
   } = {
     port: 3000,
     logLevel: 'info',
     mode: 'csr'
   }) {
+  const {
+    appDir,
+    srcDir,
+    cliDir
+  } = await getAppPaths()
   /**
    * @type {import('vite').ViteDevServer}
    */
   let vite: ViteDevServer
   vite = await (await import('vite')).createServer({
     configFile: false,
-    ...baseConfig({
+    ...(await baseConfig({
       cliDir,
       srcDir,
       appDir,
-      ssr: mode === 'ssr' ? 'client' : undefined,
-      plugins
-    }),
+      ssr: mode === 'ssr' ? 'client' : undefined
+    })),
     logLevel,
     server: {
       port,
@@ -125,21 +121,15 @@ export async function createServer ({
 
 let server: Server
 let vite: ViteDevServer
-let plugins
-if (argv.plugins) {
-  plugins = (await import(resolve(appDir, argv.plugins))).default(appPaths)
-}
 switch (argv.mode) {
   case 'ssr':
     ({ server, vite } = await createServer({
       mode: 'ssr',
-      plugins,
       host: argv.host
     }))
     break;
   default:
     ({ server, vite } = await createServer({
-      plugins,
       host: argv.host
     }))
     break;

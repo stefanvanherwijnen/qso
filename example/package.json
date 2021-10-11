@@ -5,7 +5,11 @@
   "type": "module",
   "dependencies": {
     "@quasar/extras": "^1.11.0",
-    "quasar": "^2.0.4"
+    "@quasar/quasar-app-extension-qcalendar": "^4.0.0-beta.0",
+    "@quasar/quasar-ui-qcalendar": "^4.0.0-beta.0",
+    "quasar": "^2.0.4",
+    "quasar-app-extension-http-authentication": "file:.yalc/quasar-app-extension-http-authentication",
+    "quasar-ui-http-authentication": "file:.yalc/quasar-ui-http-authentication"
   },
   "devDependencies": {
     "@stefanvh/quasar-app-vite": "^0.2.3"

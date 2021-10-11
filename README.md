@@ -35,10 +35,15 @@ import { QuasarPlugin } from '@stefanvh/quasar-app-vite'
 
 ## Development project
 A modified [Quasar UI dev project](https://github.com/quasarframework/quasar/tree/dev/ui/dev) can be found under [dev](./dev). There is a lot to be tested, so any extra help would be appreciated :smile:.
+
 ## Known issues
 - [SSR mode](https://vitejs.dev/guide/ssr.html) is still experimental and has some problems
   - SSR builds use `require()` at runtime, which makes it impossible to import ESM files from node_modules. For this reason `noExternal: [ 'quasar']` has to be used which means that all source code will be compiled to CJS which leads to longer build times
   - The dev server does not support injecting CSS (https://github.com/vitejs/vite/issues/2282).
 - This package is an ES Module. Support for ESM in Node is partly experimental which means that any number of errors may occur (although everything seems to work at the moment)
-- @quasar/app inserts any semi-dynamic imports (e.g. plugins, boot files, extras etc) at build time as static imports. Right now, anything defined in quasar.conf is imported dynamically with non-variable strings ([quasar-extras.ts](./quasar-extras.ts) and [quasar-plugins.ts](./quasar-plugins.ts)), but there might be a better solution for dynamic ESM imports.
 - Quasar is packed with features and there is still a long way to go to port everything to Vite.
+
+## Considerations
+- Instead of template interpolation for build time imports, [virtual files](https://vitejs.dev/guide/api-plugin.html#importing-a-virtual-file) are used to import the required plugins, components, extras and boot files at runtime.
+- Because quasar/ui uses CommonJS code at the moment, some 'hacks' are required to make e.g. `quasar/wrappers` work.
+- Auto import of components and SASS with unplugin-vue-components only works from Vue SFC source files. Nested components in for example an app extension are not automatically resolved, thus there needs to be a way to let Vite know what to import (instead of importing everything). Right now quasar.conf is used for this purpose and app extensions should extend it with the components used in the app extension.

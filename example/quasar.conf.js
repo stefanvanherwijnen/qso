@@ -1,4 +1,18 @@
-// Currently not used but required when checking if the directory is a Quasar project
-export default {
-
+export default function (ctx) {
+  return {
+    boot: [
+      'test.js'
+    ],
+    extras: [
+      'material-icons'
+    ],
+    framework: {
+      components: [
+        'QBtn'
+      ],
+      plugins: [
+        'Notify'
+      ]
+    }
+  }
 }

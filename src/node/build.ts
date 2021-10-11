@@ -2,7 +2,7 @@
 import { build } from 'vite'
 import { resolve } from 'path'
 
-import appPaths from '@stefanvh/quasar-app-vite/lib/app-paths'
+import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
 import { baseConfig } from '@stefanvh/quasar-app-vite'
 
 import parseArgs from 'minimist'
@@ -25,18 +25,19 @@ const argv = parseArgs(process.argv.slice(2), {
   }
 })
 
-const {
-  appDir,
-  srcDir,
-  cliDir
-} = appPaths
-
 async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg' }) {
-  let config = baseConfig({
+  const {
+    appDir,
+    srcDir,
+    cliDir
+  } = await getAppPaths()
+
+  let config = await baseConfig({
     cliDir,
     appDir,
     srcDir,
-    ssr: opts?.ssr })
+    ssr: opts?.ssr
+  })
 
   let outDir
   switch (opts?.ssr) {
@@ -57,12 +58,12 @@ async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg' }) {
   return build({
     configFile: false,
     // logLevel: 'silent',
+    ...config,
     build: {
       minify: false,
       outDir,
       emptyOutDir: true
-    },
-    ...config
+    }
   })
 }
 
@@ -82,7 +83,7 @@ switch (argv.mode) {
     console.log('Prerendering not supported yet')
     await buildQuasar({
       ssr: 'ssg'
-    })    
+    })
     break;
   default:
     console.log('Invalid build mode')

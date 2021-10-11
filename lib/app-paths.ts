@@ -3,8 +3,8 @@ import fs from 'fs'
 import { normalize, resolve, join, sep } from 'path'
 import { fileURLToPath } from 'url';
 
-async function getAppDir (): Promise<string> {
-  let dir = process.cwd()
+async function getAppDir (initialAppDir?: string): Promise<string> {
+  let dir = initialAppDir || process.cwd()
 
   while (dir.length && dir[dir.length - 1] !== sep) {
     if (fs.existsSync(join(dir, 'quasar.conf.js')) || fs.existsSync(join(dir, 'quasar.conf.ts'))) {
@@ -22,6 +22,7 @@ async function getAppDir (): Promise<string> {
 async function getCliDir (): Promise<string> {
   // Replace with import.meta.resolve in the future
   let dir = fileURLToPath(import.meta.url)
+
   while (dir.length && dir[dir.length - 1] !== sep) {
     if (fs.existsSync(join(dir, 'main.ts')) && fs.existsSync(join(dir, 'index.html'))) {
       return dir
@@ -35,36 +36,43 @@ async function getCliDir (): Promise<string> {
   return fatal(`Error. Vite configuration file not found.`)
 }
 
-const appDir = await getAppDir()
-const cliDir = await getCliDir()
-const srcDir = resolve(appDir, 'src')
-const pwaDir = resolve(appDir, 'src-pwa')
-const ssrDir = resolve(appDir, 'src-ssr')
-const cordovaDir = resolve(appDir, 'src-cordova')
-const capacitorDir = resolve(appDir, 'src-capacitor')
-const electronDir = resolve(appDir, 'src-electron')
-const bexDir = resolve(appDir, 'src-bex')
+export const getAppPaths = async (initialAppDir?: string) => {
+  const appDir = await getAppDir(initialAppDir)
+  const cliDir = await getCliDir()
+  const srcDir = resolve(appDir, 'src')
+  const pwaDir = resolve(appDir, 'src-pwa')
+  const ssrDir = resolve(appDir, 'src-ssr')
+  const cordovaDir = resolve(appDir, 'src-cordova')
+  const capacitorDir = resolve(appDir, 'src-capacitor')
+  const electronDir = resolve(appDir, 'src-electron')
+  const bexDir = resolve(appDir, 'src-bex')
 
-export default {
-  cliDir,
-  appDir,
-  srcDir,
-  pwaDir,
-  ssrDir,
-  cordovaDir,
-  capacitorDir,
-  electronDir,
-  bexDir,
+  const appPaths = {
+    cliDir,
+    appDir,
+    srcDir,
+    pwaDir,
+    ssrDir,
+    cordovaDir,
+    capacitorDir,
+    electronDir,
+    bexDir,
 
-  resolve: {
-    cli: (dir: string) => join(cliDir, dir),
-    app: (dir: string) => join(appDir, dir),
-    src: (dir: string) => join(srcDir, dir),
-    pwa: (dir: string) => join(pwaDir, dir),
-    ssr: (dir: string) => join(ssrDir, dir),
-    cordova: (dir: string) => join(cordovaDir, dir),
-    capacitor: (dir: string) => join(capacitorDir, dir),
-    electron: (dir: string) => join(electronDir, dir),
-    bex: (dir: string) => join(bexDir, dir)
+    resolve: {
+      cli: (dir: string) => join(cliDir, dir),
+      app: (dir: string) => join(appDir, dir),
+      src: (dir: string) => join(srcDir, dir),
+      pwa: (dir: string) => join(pwaDir, dir),
+      ssr: (dir: string) => join(ssrDir, dir),
+      cordova: (dir: string) => join(cordovaDir, dir),
+      capacitor: (dir: string) => join(capacitorDir, dir),
+      electron: (dir: string) => join(electronDir, dir),
+      bex: (dir: string) => join(bexDir, dir)
+    }
   }
+  return appPaths
 }
+
+type AsyncReturnType<T extends (...args: any) => Promise<any>> =
+  T extends (...args: any) => Promise<infer R> ? R : any
+export type AppPaths = AsyncReturnType<typeof getAppPaths>
