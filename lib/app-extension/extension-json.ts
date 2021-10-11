@@ -10,10 +10,11 @@ class ExtensionJson {
     this.extensionPath = appPaths.resolve.app('quasar.extensions.json')
 
     try {
-      this.extensions = JSON.parse(fs.readFileSync(this.extensionPath, 'utf-8'))
+      if (fs.existsSync(this.extensionPath)) {
+        this.extensions = JSON.parse(fs.readFileSync(this.extensionPath, 'utf-8'))
+      }
     }
     catch (e) {
-      console.log(e)
       fatal('quasar.extensions.json is malformed', 'FAIL')
     }
   }
