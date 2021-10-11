@@ -24,6 +24,7 @@ const importMap = generateImportMap(quasarDir!)
 import IndexAPI from '@stefanvh/quasar-app-vite/lib/app-extension/IndexAPI'
 import Extension from '@stefanvh/quasar-app-vite/lib/app-extension/Extension'
 import { QuasarConf } from '@stefanvh/quasar-app-vite/lib/quasar-conf-file'
+const imported: string[] = []
 
 /**
  * Proper indentation is required
@@ -35,6 +36,9 @@ const additionalDataSass = (components: string[] = [], plugins: string[] = [], c
     }
     return v
   }))
+
+  imported.push(...components)
+  imported.push(...plugins)
 
   return `@import 'quasar/src/css/helpers/string.sass'
 @import 'quasar/src/css/helpers/math.sass'
@@ -88,9 +92,10 @@ export const QuasarAutoImportPlugin = Components({
       if (name.match(/Q[A-Z][A-z]*/)) {
         if (name in importMap) {
           const sideEffects = importMap[name].sideEffects ? `quasar/${importMap[name].sideEffects}` : undefined
+          imported.push(name)
           return {
             path: `quasar/${importMap[name].file}`,
-            sideEffects
+            sideEffects: !imported.includes(name) ? sideEffects : undefined
           }
         }
       }
