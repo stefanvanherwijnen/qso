@@ -28,7 +28,7 @@ import { QuasarConf } from '@stefanvh/quasar-app-vite/lib/quasar-conf-file'
 /**
  * Proper indentation is required
  */
-const additionalDataSass = (components?: string[], plugins?: string[], css?: string[]) => {
+const additionalDataSass = (components: string[] = [], plugins: string[] = [], css: string[] = []) => {
   css = css?.map((v => {
     if (v[0] === '~') {
       return v.slice(1)
@@ -71,7 +71,7 @@ ${css?.map((v) => `@import '${v}'`).join('\n')}
 `
 }
 
-const importExportLiteral = (imports: string[], exports: string[]) => `${imports.join('\n')}
+const importExportLiteral = (imports: string[] = [], exports: string[] = []) => `${imports.join('\n')}
 
 export default {
   ${exports.join(',\n')}
@@ -175,7 +175,7 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
   if (quasarConf?.boot) {
     bootFilePaths = (quasarConf.boot as (Record<string, any> | string)[])
       .filter(entry => {
-        if (typeof entry === 'object') return import.meta.env.SSR === entry.server
+        if (typeof entry === 'object') return (entry.server && (configuration.ssr === 'server'))
         else if (entry !== '') return true
       })
       .map(entry => {
@@ -301,7 +301,7 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
         }
       }
     },
-    // QuasarAutoImportPlugin,
+    QuasarAutoImportPlugin,
     {
       name: 'vite-plugin-quasar',
       enforce: 'pre',
