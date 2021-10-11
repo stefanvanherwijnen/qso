@@ -5,6 +5,7 @@
   "productName": "Quasar App",
   "author": "Razvan Stoenescu <razvan.stoenescu@gmail.com>",
   "private": true,
+  "type": "module",
   "scripts": {
     "test": "echo \"No test specified\" && exit 0"
   },
