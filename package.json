@@ -20,7 +20,6 @@
     "@vitejs/plugin-vue": "^1.9.2",
     "@vitejs/plugin-vue-jsx": "^1.2.0",
     "@vue/compiler-sfc": "^3.2.19",
-    "@vue/server-renderer": "^3.2.19",
     "chalk": "^4.1.2",
     "compression": "^1.7.4",
     "cross-env": "^7.0.3",
@@ -32,7 +31,7 @@
     "unplugin-vue-components": "^0.15.6",
     "vite": "^2.6.2",
     "vite-plugin-pwa": "^0.11.3",
-    "vue": "3.2.19",
+    "vue": "3.2.20",
     "vue-router": "4.0.11",
     "workbox-build": "^6.3.0",
     "workbox-window": "^6.3.0"
