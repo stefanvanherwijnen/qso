@@ -4,11 +4,7 @@ This package aims to be a [Vite](https://vitejs.dev) based alternative for [@qua
 
 ## Install
 ```
-yarn add --dev @stefanvh/quasar-app-vite
-```
-or
-```
-npm install --save-dev @stefanvh/quasar-app-vite
+pnpm add -D @stefanvh/quasar-app-vite
 ```
 
 ## Example
@@ -16,7 +12,7 @@ Clone the example folder for a minimal working example.
 
 ## Usage
 ### Commands
-Use `yarn run` or `npx`:
+Use `pnpm exec` to run the following commands:
 
 - `quasar-vite build`: Build your Quasar project and output to `dist/`
 - `quasar-vite dev`: Spin up a development server

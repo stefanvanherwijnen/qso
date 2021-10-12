@@ -1,9 +1,12 @@
 # Install
 Clone the repository and run
-`yarn install`
+`pnpm i` or the npm/yarn install commands.
 
 # Build
-`yarn run quasar-vite build`
+`pnpm exec quasar-vite build`
+
+# Dev server
+`pnpm exec quasar-vite dev`
 
 ## Serve
 For now, if you have Quasar CLI installed, you can use [serve](https://quasar.dev/quasar-cli/commands-list#serve) to spin up a server:
