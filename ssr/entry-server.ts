@@ -4,7 +4,7 @@ import { renderToString } from '@vue/server-renderer'
 // import { ApolloClients } from '@vue/apollo-composable'
 // import serialize from 'serialize-javascript'
 
-export async function render(url, manifest, ssrContext) {
+export async function render (url, manifest, ssrContext) {
   const { app, router } = createApp(ssrContext)
   // set the router to the desired URL before rendering
   router.push(url)
@@ -32,7 +32,7 @@ export async function render(url, manifest, ssrContext) {
   return [html, preloadLinks]
 }
 
-function renderPreloadLinks(modules, manifest) {
+function renderPreloadLinks (modules, manifest) {
   let links = ''
   const seen = new Set()
   modules.forEach((id) => {
@@ -49,7 +49,7 @@ function renderPreloadLinks(modules, manifest) {
   return links
 }
 
-function renderPreloadLink(file) {
+function renderPreloadLink (file) {
   if (file.endsWith('.js')) {
     return `<link rel="modulepreload" crossorigin href="${file}">`
   } else if (file.endsWith('.css')) {

@@ -6,7 +6,7 @@ import { existsSync } from 'fs'
 
 import { fileURLToPath } from 'url';
 
-export function generateImportMap(quasarRoot: string) {
+export function generateImportMap (quasarRoot: string) {
 
   // const appDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
   // Import from node_modules
@@ -22,7 +22,7 @@ export function generateImportMap(quasarRoot: string) {
     ).substring(1)
   }
   function lowerCamelCase (name: string) {
-    return name.replace(/-([a-z])/g, g => g[ 1 ].toUpperCase())
+    return name.replace(/-([a-z])/g, g => g[1].toUpperCase())
   }
   function relative (name: string) {
     return pathRelative(quasarRoot, name).split('\\').join('/')
@@ -36,7 +36,7 @@ export function generateImportMap(quasarRoot: string) {
       .map(relative)
       .forEach(file => {
         const name = getWithoutExtension(basename(file))
-        map[ name ] = {
+        map[name] = {
           file: file,
           sideEffects: existsSync(resolvePath(file.replace('.js', '.sass'))) ? file.replace('.js', '.sass') : undefined
         }
@@ -51,7 +51,7 @@ export function generateImportMap(quasarRoot: string) {
           name = getWithoutExtension(basename(file)),
           kebab = 'v-' + kebabCase(name)
 
-        map[ name ] = {
+        map[name] = {
           file: file
         }
 
@@ -63,7 +63,7 @@ export function generateImportMap(quasarRoot: string) {
       .map(relative)
       .forEach(file => {
         const name = getWithoutExtension(basename(file))
-        map[ name ] = {
+        map[name] = {
           file: file
         }
       })
@@ -74,7 +74,7 @@ export function generateImportMap(quasarRoot: string) {
       .map(relative)
       .forEach(file => {
         const name = getWithoutExtension(basename(file))
-        map[ lowerCamelCase(name) ] = {
+        map[lowerCamelCase(name)] = {
           file: file
         }
       })
@@ -85,7 +85,7 @@ export function generateImportMap(quasarRoot: string) {
       .map(relative)
       .forEach(file => {
         const name = getWithoutExtension(basename(file))
-        map[ name === 'open-url' ? 'openURL' : lowerCamelCase(name) ] = {
+        map[name === 'open-url' ? 'openURL' : lowerCamelCase(name)] = {
           file: file
         }
       })

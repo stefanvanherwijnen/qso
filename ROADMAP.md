@@ -8,5 +8,6 @@
   - [ ] Make it compatible with default Vue Vite projects
   - [ ] Make sure that all auto-imports work correctly
 - [ ] Port Quasar features
-  - [ ] Boot files
+  - [x] Boot files
+  - [x] App extensions
   - [ ] ...

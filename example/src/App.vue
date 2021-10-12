@@ -1,6 +1,8 @@
 <template>
   <div>
-    <q-btn label="Quasar button" to="/about"></q-btn>
+    <q-btn label="About" to="/about"></q-btn>
+    <q-btn label="Login" to="/login"></q-btn>
+    <q-btn label="QCalendar" to="/qcalendar"></q-btn>
     <router-view />
   </div>
 </template>
