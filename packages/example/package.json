@@ -9,7 +9,9 @@
     "@quasar/quasar-ui-qcalendar": "^4.0.0-beta.0",
     "quasar": "^2.1.1",
     "quasar-app-extension-http-authentication": "^2.0.1-beta.19",
-    "quasar-ui-http-authentication": "^2.0.1-beta.19"
+    "quasar-ui-http-authentication": "^2.0.1-beta.19",
+    "vue": "^3.2.20",
+    "vue-router": "^4.0.11"
   },
   "devDependencies": {
     "@stefanvh/quasar-app-vite": "^0.3.0"

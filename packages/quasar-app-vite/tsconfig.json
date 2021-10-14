@@ -4,14 +4,8 @@
     "module": "esnext",
     "moduleResolution": "Node",
     "target": "ES2020",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
-    "types": [
-      "vite/client"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": ["vite/client"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "baseUrl": "./",
@@ -19,18 +13,15 @@
     "outDir": "./dist",
     "paths": {
       // "@stefanvh/quasar-app-vite/build": ["./*"],
-      "@stefanvh/quasar-app-vite": [
-        "./packages/quasar-app-vite/src/index"
-      ],
-      "@stefanvh/quasar-app-vite/*": [
-        "./packages/quasar-app-vite/src/*"
-      ],
-      "@stefanvh/quasar-app-vite/lib/*": [
-        "./packages/quasar-app-vite/lib/*"
-      ]
+      "@stefanvh/quasar-app-vite": ["./src/index"],
+      "@stefanvh/quasar-app-vite/*": ["./src/*"],
+      "@stefanvh/quasar-app-vite/lib/*": ["./lib/*"]
     }
   },
-  "include": [],
+  "include": [
+    "src/**/*",
+    "lib/**/*"
+  ],
   "ts-node": {
     "compilerOptions": {
       "module": "ES2020",

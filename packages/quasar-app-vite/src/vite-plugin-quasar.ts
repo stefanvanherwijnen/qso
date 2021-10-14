@@ -2,7 +2,7 @@ import type { Plugin, ResolvedConfig } from 'vite'
 import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa'
 import Components from 'unplugin-vue-components/vite'
 import { resolve } from 'path'
-import { generateImportMap } from '@stefanvh/quasar-app-vite/lib/import-map'
+import { generateImportMap, parseAutoImport } from '@stefanvh/quasar-app-vite/lib/import-map'
 import { AppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
 import { existsSync } from 'fs'
 import { join, sep, normalize } from 'path'
@@ -18,9 +18,9 @@ function getQuasarDir () {
     dir = normalize(join(dir, '..'))
   }
 }
-const quasarDir = getQuasarDir()
+export const quasarDir = getQuasarDir()
 if (!quasarDir) fatal('Quasar directory not found')
-const importMap = generateImportMap(quasarDir!)
+const { map: importMap, autoImport } = generateImportMap(quasarDir!)
 import IndexAPI from '@stefanvh/quasar-app-vite/lib/app-extension/IndexAPI'
 import Extension from '@stefanvh/quasar-app-vite/lib/app-extension/Extension'
 import { QuasarConf } from '@stefanvh/quasar-app-vite/lib/quasar-conf-file'
@@ -36,6 +36,15 @@ const additionalDataSass = (components: string[] = [], plugins: string[] = [], c
     }
     return v
   }))
+
+  const componentsCss = components
+    ?.filter((component) => importMap[component].sideEffects?.length)
+    .map((component) => importMap[component].sideEffects?.map((s) => `@import 'quasar/${s}'`).join('\n')).join('\n')
+
+
+  const pluginsCss = plugins
+    ?.filter((plugin) => importMap[plugin].sideEffects?.length)
+    .map((plugin) => importMap[plugin].sideEffects?.map((s) => `@import 'quasar/${s}'`).join('\n')).join('\n')
 
   imported.push(...components)
   imported.push(...plugins)
@@ -61,20 +70,16 @@ const additionalDataSass = (components: string[] = [], plugins: string[] = [], c
 /* Directives */
 @import 'quasar/src/directives/Ripple.sass'
 @import 'quasar/src/directives/Morph.sass'
-
 /* Components */
-${components?.filter((component) => importMap[component].sideEffects).map((component) => `@import 'quasar/${importMap[component].sideEffects}'`).join('\n')}
-
+${componentsCss}
 /* Plugins */
-${plugins?.filter((plugin) => importMap[plugin].sideEffects).map((plugin) => `@import 'quasar/${importMap[plugin].sideEffects}'`).join('\n')}
+${pluginsCss}
 @import 'quasar/src/plugins/Loading.sass'
 @import 'quasar/src/plugins/Notify.sass'
-
 /* CSS */
 ${css?.map((v) => `@import '${v}'`).join('\n')}
 `
 }
-
 const importExportLiteral = (imports: string[] = [], exports: string[] = []) => `${imports.join('\n')}
 
 export default {
@@ -91,8 +96,8 @@ export const QuasarAutoImportPlugin = Components({
     (name: string) => {
       if (name.match(/Q[A-Z][A-z]*/)) {
         if (name in importMap) {
-          const sideEffects = importMap[name].sideEffects ? `quasar/${importMap[name].sideEffects}` : undefined
-          imported.push(name)
+          // const sideEffects = importMap[name].sideEffects ? `quasar/${importMap[name].sideEffects}` : undefined
+          const sideEffects = importMap[name].sideEffects?.map((s) => `quasar/${s}`)
           return {
             path: `quasar/${importMap[name].file}`,
             sideEffects: !imported.includes(name) ? sideEffects : undefined
@@ -105,7 +110,7 @@ export const QuasarAutoImportPlugin = Components({
 
 // Should be an argument to the plugin
 export interface Configuration {
-  appPaths?: AppPaths,
+  appPaths: AppPaths,
   ssr?: 'server' | 'client' | 'ssg',
   injectEntry?: boolean,
   loadQuasarConf?: boolean,
@@ -128,14 +133,18 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
     }
   }
 
-  let quasarConf: QuasarConf | undefined
+  let quasarConf: QuasarConf
   let quasarExtensions: Record<string, any> | undefined
 
-  if (configuration?.appPaths && configuration?.loadQuasarConf) {
-    const QuasarConfFile = (await import('@stefanvh/quasar-app-vite/lib/quasar-conf-file')).default
-    const QuasarConf = new QuasarConfFile(ctx, configuration.appPaths)
-    quasarConf = await QuasarConf.get()
-  }
+  const QuasarConfFile = (await import('@stefanvh/quasar-app-vite/lib/quasar-conf-file')).default
+  const QuasarConf = new QuasarConfFile(ctx, configuration.appPaths)
+  quasarConf = await QuasarConf.get()
+
+  // if (configuration?.appPaths && configuration?.loadQuasarConf) {
+  //   const QuasarConfFile = (await import('@stefanvh/quasar-app-vite/lib/quasar-conf-file')).default
+  //   const QuasarConf = new QuasarConfFile(ctx, configuration.appPaths)
+  //   quasarConf = await QuasarConf.get()
+  // }
 
   if (configuration?.appPaths && configuration?.loadQuasarExtensions) {
     const ExtensionJson = (await import('@stefanvh/quasar-app-vite/lib/app-extension/extension-json')).default
@@ -149,7 +158,7 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
     )
   }
 
-  if (configuration?.appPaths && quasarExtensions) {
+  if (quasarExtensions) {
     let hooks: Record<string, any> = {}
     const names = Object.keys(quasarExtensions)
     // await Object.entries(configuration.quasarExtensions).forEach(async ([key, value]) => {
@@ -177,7 +186,7 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
   }
 
   let bootFilePaths: Record<string, any> = {}
-  if (quasarConf?.boot) {
+  if (quasarConf.boot) {
     bootFilePaths = (quasarConf.boot as (Record<string, any> | string)[])
       .filter(entry => {
         if (typeof entry === 'object') return (entry.server && (configuration.ssr === 'server'))
@@ -204,10 +213,10 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
       }, {})
   }
 
-  if (quasarConf?.framework.components) {
+  if (quasarConf.framework.components) {
     quasarConf.framework.components = [...new Set(quasarConf.framework.components)];
   }
-  if (quasarConf?.framework.plugins) {
+  if (quasarConf.framework.plugins) {
     quasarConf.framework.plugins = [...new Set(quasarConf.framework.plugins)];
   }
 
@@ -223,6 +232,75 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
           code = code.replace(/app\.use\(VuePlugin\)/g, `app.use(VuePlugin.install ? VuePlugin : VuePlugin.default)`)
         }
         return code
+      }
+    },
+    {
+      name: 'html-transform',
+      enforce: 'pre',
+      transformIndexHtml: {
+        enforce: 'pre',
+        transform: (html) => {
+          if (configuration?.appPaths?.cliDir) {
+            let entry: string
+            switch (configuration?.ssr) {
+              case 'server' || 'client':
+                entry = resolve(configuration.appPaths.cliDir, 'ssr', 'entry-client.ts')
+                break;
+              default:
+                entry = resolve(configuration.appPaths.cliDir, 'spa', 'entry.ts')
+            }
+            const entryScript = `<script type="module" src="${entry}"></script>`
+            html = html.replace(
+              '<!--entry-script-->',
+              entryScript
+            )
+          }
+          return html
+        }
+      }
+    },
+    QuasarAutoImportPlugin,
+    {
+      name: 'vite-plugin-quasar',
+      enforce: 'pre',
+      transform (code, id, ssr) {
+        // Required for the ssr argument during ssr builds (combined config for server and client)
+        code = code.replace(/__QUASAR_VERSION__/g, `'version'`)
+          .replace(/__QUASAR_SSR__/g, (!!ssr).toString())
+          .replace(/__QUASAR_SSR_SERVER__/g, (!!ssr).toString())
+          .replace(/__QUASAR_SSR_CLIENT__/g, false.toString())
+          .replace(/__QUASAR_SSR_PWA__/g, (!!ssr && isPwa).toString())
+        return code
+      },
+      config: (config, env) => {
+        return {
+          resolve: {
+            alias: quasarConf.vite?.alias
+          },
+          build: {
+            ssr: (configuration?.ssr === 'server' && configuration?.appPaths?.cliDir) ? resolve(configuration.appPaths.cliDir, 'ssr', 'entry-server.ts') : false,
+            ssrManifest: configuration?.ssr === 'client'
+          },
+          ssr: {
+            noExternal: configuration?.ssr ? ['quasar'] : undefined
+          },
+          define: {
+            __DEV__: process.env.NODE_ENV !== 'production' || true,
+            // Does not work
+            // __QUASAR_VERSION__: 'version',
+            // __QUASAR_SSR__: false,
+            // __QUASAR_SSR_SERVER__: false,
+            // __QUASAR_SSR_CLIENT__: false,
+            // __QUASAR_SSR_PWA__: false
+          },
+          css: {
+            preprocessorOptions: {
+              sass: {
+                additionalData: additionalDataSass(quasarConf?.framework.components, quasarConf?.framework.plugins, quasarConf?.css)
+              }
+            },
+          }
+        }
       }
     },
     {
@@ -262,10 +340,13 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
           if (id === 'virtual:quasar-components') {
             const components = quasarConf.framework?.components
             const imports = components?.map((component: string) => `import ${component} from 'quasar/${importMap[component].file}'`)
-            const sideEffects = components
-              ?.filter((component: string) => importMap[component].sideEffects)
-              ?.map((component: string) => `@import 'quasar/${importMap[component].sideEffects}'`)
-            return importExportLiteral(imports, components)
+            // const sideEffects = components
+            //   ?.filter((component: string) => importMap[component].sideEffects)
+            //   ?.map((component: string) => `@import 'quasar/${importMap[component].sideEffects}'`)
+            return {
+              code: importExportLiteral(imports, components),
+              moduleSideEffects: 'no-treeshake'
+            }
           }
           if (id === 'virtual:quasar-extras') {
             const extras = quasarConf.extras
@@ -279,73 +360,6 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
           }
         }
         return null
-      }
-    },
-    {
-      name: 'html-transform',
-      enforce: 'pre',
-      transformIndexHtml: {
-        enforce: 'pre',
-        transform: (html) => {
-          if (configuration?.appPaths?.cliDir) {
-            let entry: string
-            switch (configuration?.ssr) {
-              case 'server' || 'client':
-                entry = resolve(configuration.appPaths.cliDir, 'ssr', 'entry-client.ts')
-                break;
-              default:
-                entry = resolve(configuration.appPaths.cliDir, 'spa', 'entry.ts')
-            }
-            const entryScript = `<script type="module" src="${entry}"></script>`
-            html = html.replace(
-              '<!--entry-script-->',
-              entryScript
-            )
-          }
-          return html
-        }
-      }
-    },
-    QuasarAutoImportPlugin,
-    {
-      name: 'vite-plugin-quasar',
-      enforce: 'pre',
-      transform (code, id, ssr) {
-        if (code.includes('q-form')) console.log(id)
-        // Required for the ssr argument during ssr builds (combined config for server and client)
-        code = code.replace(/__QUASAR_VERSION__/g, `'version'`)
-          .replace(/__QUASAR_SSR__/g, (!!ssr).toString())
-          .replace(/__QUASAR_SSR_SERVER__/g, (!!ssr).toString())
-          .replace(/__QUASAR_SSR_CLIENT__/g, false.toString())
-          .replace(/__QUASAR_SSR_PWA__/g, (!!ssr && isPwa).toString())
-        return code
-      },
-      config: (config, env) => {
-        return {
-          build: {
-            ssr: (configuration?.ssr === 'server' && configuration?.appPaths?.cliDir) ? resolve(configuration.appPaths.cliDir, 'ssr', 'entry-server.ts') : false,
-            ssrManifest: configuration?.ssr === 'client'
-          },
-          ssr: {
-            noExternal: configuration?.ssr ? ['quasar'] : undefined
-          },
-          define: {
-            __DEV__: process.env.NODE_ENV !== 'production' || true,
-            // Does not work
-            // __QUASAR_VERSION__: 'version',
-            // __QUASAR_SSR__: false,
-            // __QUASAR_SSR_SERVER__: false,
-            // __QUASAR_SSR_CLIENT__: false,
-            // __QUASAR_SSR_PWA__: false
-          },
-          css: {
-            preprocessorOptions: {
-              sass: {
-                additionalData: additionalDataSass(quasarConf?.framework.components, quasarConf?.framework.plugins, quasarConf?.css)
-              }
-            },
-          }
-        }
       }
     },
     ...extraPlugins
