@@ -32,6 +32,6 @@
     "vue-router": "^4.0.11"
   },
   "devDependencies": {
-    "@stefanvh/quasar-app-vite": "^0.2.3"
+    "@stefanvh/quasar-app-vite": "^0.4.0"
   }
 }
