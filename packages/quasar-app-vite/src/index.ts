@@ -25,17 +25,14 @@ export const baseConfig = async ({
   cliDir,
   srcDir,
   appDir,
-  ssr,
-  plugins
+  ssr
 }: {
   cliDir: string,
   srcDir: string,
   appDir: string,
-  ssr?: 'client' | 'server' | 'ssg',
-  plugins?: Plugin[]
+  ssr?: 'client' | 'server' | 'ssg'
 }) => {
   const appPaths = await getAppPaths()
-  if (!plugins) plugins = []
   // try {
   //   quasarConf = (await import(resolve(appDir, 'quasar.conf.js'))).default
   // } catch (e) {
@@ -55,8 +52,7 @@ export const baseConfig = async ({
         ssr: ssr,
         loadQuasarConf: true,
         loadQuasarExtensions: true
-      }),
-      ...plugins
+      })
     ],
     resolve: {
       dedupe: [

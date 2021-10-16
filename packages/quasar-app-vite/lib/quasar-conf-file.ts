@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from 'fs'
 import path from 'path'
 import { green } from 'chalk'
+import { Plugin } from 'vite'
 
 import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
 import { log, warn, fatal, error } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
@@ -27,7 +28,8 @@ export interface QuasarConf {
     }
   },
   vite?: {
-    alias: Record<string, string> | Array<{ find: string | RegExp, replacement: string }>
+    alias: Record<string, string> | Array<{ find: string | RegExp, replacement: string }>,
+    plugins: Plugin[]
   }
 }
 

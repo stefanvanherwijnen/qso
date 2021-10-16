@@ -158,6 +158,10 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
     )
   }
 
+  if (quasarConf?.vite?.plugins) {
+    extraPlugins.push(...quasarConf.vite.plugins)
+  }
+
   if (quasarExtensions) {
     let hooks: Record<string, any> = {}
     const names = Object.keys(quasarExtensions)
