@@ -1,6 +1,6 @@
 {
   "name": "@stefanvh/quasar-app-vite",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Stefan van Herwijnen",
   "license": "MIT",
   "type": "module",
