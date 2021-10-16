@@ -4,10 +4,18 @@
 - [ ] Add development and production server commands
   - [x] Development server: quasar-vite dev
   - [ ] Add proper logging when using SSR dev server
+  - [ ] Build command
+    - [x] CSR build
+    - [ ] SSR build
+    - [ ] SSG build
 - [ ] Finish the Quasar Vite plugin
-  - [ ] Make it compatible with default Vue Vite projects
-  - [ ] Make sure that all auto-imports work correctly
+  - [x] Make it compatible with default Vue Vite projects
+  - [x] Make sure that all auto-imports work correctly
 - [ ] Port Quasar features
   - [x] Boot files
-  - [x] App extensions
+  - [] App extensions
+    - [ ] Index API
+    - [ ] Install API
+    - [ ] Promps API
+    - [ ] Uninstall API
   - [ ] ...
