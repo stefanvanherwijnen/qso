@@ -6,6 +6,32 @@ import { existsSync } from 'fs'
 
 import { fileURLToPath } from 'url';
 
+interface AutoImport {
+  kebabComponents: string[],
+  pascalComponents: string[],
+  components?: string[],
+  directives: string[],
+  importName: Record<string, string>
+}
+
+
+export function parseAutoImport (autoImport: AutoImport) {
+  autoImport.kebabComponents.sort((a, b) => (a.length > b.length ? -1 : 1))
+  autoImport.pascalComponents.sort((a, b) => (a.length > b.length ? -1 : 1))
+  autoImport.components = autoImport.kebabComponents.concat(autoImport.pascalComponents)
+  autoImport.directives.sort((a, b) => (a.length > b.length ? -1 : 1))
+
+  return {
+    importName: autoImport.importName,
+    regex: {
+      kebabComponents: '(' + autoImport.kebabComponents.join('|') + ')',
+      pascalComponents: '(' + autoImport.pascalComponents.join('|') + ')',
+      components: '(' + autoImport.components.join('|') + ')',
+      directives: '(' + autoImport.directives.join('|') + ')'
+    }
+  }
+}
+
 export function generateImportMap (quasarRoot: string) {
 
   // const appDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -31,18 +57,27 @@ export function generateImportMap (quasarRoot: string) {
     const insertionPoint = filename.lastIndexOf('.')
     return filename.slice(0, insertionPoint)
   }
-  function addComponents (map: Record<string, any>) {
+  function addComponents (map: Record<string, any>, autoImport: AutoImport) {
     glob.sync(resolvePath('src/components/**/Q*.js'))
       .map(relative)
       .forEach(file => {
         const name = getWithoutExtension(basename(file))
+        const kebab = kebabCase(name)
+        const sideEffects = []
+        if (existsSync(resolvePath(file.replace('.js', '.sass')))) sideEffects.push(file.replace('.js', '.sass'))
+
         map[name] = {
           file: file,
-          sideEffects: existsSync(resolvePath(file.replace('.js', '.sass'))) ? file.replace('.js', '.sass') : undefined
+          sideEffects
         }
+
+        autoImport.kebabComponents.push(kebab)
+        autoImport.pascalComponents.push(name)
+        autoImport.importName[name] = name
+        autoImport.importName[kebab] = name
       })
   }
-  function addDirectives (map: Record<string, any>) {
+  function addDirectives (map: Record<string, any>, autoImport: AutoImport) {
     glob.sync(resolvePath('src/directives/*.js'))
       .filter(file => file.endsWith('.ssr.js') === false)
       .map(relative)
@@ -54,6 +89,11 @@ export function generateImportMap (quasarRoot: string) {
         map[name] = {
           file: file
         }
+
+        autoImport.kebabComponents.push(kebab)
+        autoImport.pascalComponents.push(name)
+        autoImport.importName[name] = name
+        autoImport.importName[kebab] = name
 
       })
   }
@@ -91,14 +131,25 @@ export function generateImportMap (quasarRoot: string) {
       })
   }
 
+  const autoImport = {
+    kebabComponents: [],
+    pascalComponents: [],
+    directives: [],
+    importName: {}
+  }
+
   const map: Record<string, {
     file: string,
-    sideEffects?: string
+    sideEffects?: string[]
   }> = {}
-  addComponents(map)
-  addDirectives(map)
+  addComponents(map, autoImport)
+  addDirectives(map, autoImport)
   addPlugins(map)
   addComposables(map)
   addUtils(map)
-  return map
+
+  return {
+    map,
+    autoImport
+  }
 }

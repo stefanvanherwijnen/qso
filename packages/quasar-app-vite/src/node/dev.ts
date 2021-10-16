@@ -6,7 +6,7 @@ import { printHttpServerUrls, log } from '@stefanvh/quasar-app-vite/lib/helpers/
 import { baseConfig, VitePlugins } from '@stefanvh/quasar-app-vite'
 import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
 import parseArgs from 'minimist'
-import { Plugin } from 'vite'
+import { searchForWorkspaceRoot } from 'vite'
 import { Server } from 'net'
 
 const argv = parseArgs(process.argv.slice(2), {
@@ -43,6 +43,7 @@ export async function createServer ({
     srcDir,
     cliDir
   } = await getAppPaths()
+
   /**
    * @type {import('vite').ViteDevServer}
    */
@@ -61,8 +62,9 @@ export async function createServer ({
       middlewareMode: mode === 'ssr' ? 'ssr' : undefined,
       fs: {
         allow: [
-          resolve(cliDir),
-          resolve(appDir),
+          searchForWorkspaceRoot(process.cwd()),
+          cliDir,
+          appDir,
         ]
       },
       watch: {

@@ -1,11 +1,13 @@
 import { readFileSync, existsSync } from 'fs'
 import path from 'path'
 import { green } from 'chalk'
+import { Plugin } from 'vite'
 
 import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
 import { log, warn, fatal, error } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
 import { VitePWAOptions } from 'vite-plugin-pwa'
 
+import merge from 'merge-deep'
 export interface QuasarConf {
   ctx: Record<string, any>
   css: string[],
@@ -24,6 +26,10 @@ export interface QuasarConf {
     builder: {
       directories: {}
     }
+  },
+  vite?: {
+    alias: Record<string, string> | Array<{ find: string | RegExp, replacement: string }>,
+    plugins: Plugin[]
   }
 }
 
@@ -60,71 +66,73 @@ class QuasarConfFile {
 
     const initialConf = await quasarConfigFunction(this.ctx)
 
-    const cfg = {
-      ...{
-        ctx: this.ctx,
-        css: [],
-        boot: [],
-        vendor: {
-          add: [],
-          remove: []
-        },
-        build: {
-          transpileDependencies: [],
-          vueLoaderOptions: {
-            compilerOptions: {},
-            transformAssetUrls: {}
-          },
-          sassLoaderOptions: {},
-          scssLoaderOptions: {},
-          stylusLoaderOptions: {},
-          lessLoaderOptions: {},
-          env: {},
-          uglifyOptions: {
-            compress: {},
-            mangle: {}
-          }
-        },
-        devServer: {},
-        framework: {
-          components: [],
-          directives: [],
-          plugins: []
-        },
-        animations: [],
-        extras: [],
-        sourceFiles: {},
-        ssr: {
-          middlewares: []
-        },
-        // pwa: {
-        //   workboxOptions: {},
-        //   manifest: {
-        //     icons: []
-        //   },
-        //   metaVariables: {}
-        // },
-        bin: {},
-        bex: {
-          builder: {
-            directories: {}
-          }
-        },
-        htmlVariables: {}
+    const cfg = merge({
+      ctx: this.ctx,
+      css: [],
+      boot: [],
+      vendor: {
+        add: [],
+        remove: []
       },
-      ...initialConf
-    } as QuasarConf
+      build: {
+        transpileDependencies: [],
+        vueLoaderOptions: {
+          compilerOptions: {},
+          transformAssetUrls: {}
+        },
+        sassLoaderOptions: {},
+        scssLoaderOptions: {},
+        stylusLoaderOptions: {},
+        lessLoaderOptions: {},
+        env: {},
+        uglifyOptions: {
+          compress: {},
+          mangle: {}
+        }
+      },
+      devServer: {},
+      framework: {
+        components: [],
+        directives: [],
+        plugins: []
+      },
+      animations: [],
+      extras: [],
+      sourceFiles: {},
+      ssr: {
+        middlewares: []
+      },
+      // pwa: {
+      //   workboxOptions: {},
+      //   manifest: {
+      //     icons: []
+      //   },
+      //   metaVariables: {}
+      // },
+      bin: {},
+      bex: {
+        builder: {
+          directories: {}
+        }
+      },
+      htmlVariables: {},
+      vite: {
+        alias: []
+      }
+    },
+      initialConf
+    ) as QuasarConf
 
     // if (cfg.animations === 'all') {
     //   cfg.animations = require('./helpers/animations')
     // }
 
-    if (!cfg.framework.plugins) {
-      cfg.framework.plugins = []
-    }
-    if (!cfg.framework.config) {
-      cfg.framework.config = {}
-    }
+    // if (!cfg.framework.plugins) {
+    //   cfg.framework.plugins = []
+    // }
+    // if (!cfg.framework.config) {
+    //   cfg.framework.config = {}
+    // }
 
     return cfg
   }

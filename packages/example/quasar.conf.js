@@ -13,6 +13,17 @@ export default function (ctx) {
       plugins: [
         'Notify'
       ]
+    },
+    vite: {
+      plugins: [
+        {
+          name: 'test-plugin',
+          config: (config, env) => {
+            console.log('Test plugin loaded')
+            return config
+          }
+        }
+      ]
     }
   }
 }
