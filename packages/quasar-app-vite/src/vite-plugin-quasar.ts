@@ -26,10 +26,17 @@ import Extension from '@stefanvh/quasar-app-vite/lib/app-extension/Extension'
 import { QuasarConf } from '@stefanvh/quasar-app-vite/lib/quasar-conf-file'
 const imported: string[] = []
 
-/**
- * Proper indentation is required
- */
-const additionalDataSass = (components: string[] = [], plugins: string[] = [], css: string[] = []) => {
+const additionalDataSass = ({
+    components = [],
+    plugins = [],
+    css = [],
+    sassVariables
+  }: {
+    components: string[],
+    plugins: string[],
+    css: string[],
+    sassVariables?: string | false
+  }) => {
   css = css?.map((v => {
     if (v[0] === '~') {
       return v.slice(1)
@@ -39,47 +46,50 @@ const additionalDataSass = (components: string[] = [], plugins: string[] = [], c
 
   const componentsCss = components
     ?.filter((component) => importMap[component].sideEffects?.length)
-    .map((component) => importMap[component].sideEffects?.map((s) => `@import 'quasar/${s}'`).join('\n')).join('\n')
-
+    .map((component) => importMap[component].sideEffects?.map((s) => `@import 'quasar/${s}'`))
 
   const pluginsCss = plugins
     ?.filter((plugin) => importMap[plugin].sideEffects?.length)
-    .map((plugin) => importMap[plugin].sideEffects?.map((s) => `@import 'quasar/${s}'`).join('\n')).join('\n')
+    .map((plugin) => importMap[plugin].sideEffects?.map((s) => `@import 'quasar/${s}'`))
 
   imported.push(...components)
   imported.push(...plugins)
 
-  return `@import 'quasar/src/css/helpers/string.sass'
-@import 'quasar/src/css/helpers/math.sass'
-@import 'quasar/src/css/variables.sass'
-@import 'quasar/src/css/normalize.sass'
-@import 'quasar/src/css/core/animations.sass'
-@import 'quasar/src/css/core/colors.sass'
-@import 'quasar/src/css/core/elevation.sass'
-@import 'quasar/src/css/core/flex.sass'
-@import 'quasar/src/css/core/helpers.sass'
-@import 'quasar/src/css/core/mouse.sass'
-@import 'quasar/src/css/core/orientation.sass'
-@import 'quasar/src/css/core/positioning.sass'
-@import 'quasar/src/css/core/size.sass'
-@import 'quasar/src/css/core/touch.sass'
-@import 'quasar/src/css/core/transitions.sass'
-@import 'quasar/src/css/core/typography.sass'
-@import 'quasar/src/css/core/visibility.sass'
-@import 'quasar/src/css/core/dark.sass'
-/* Directives */
-@import 'quasar/src/directives/Ripple.sass'
-@import 'quasar/src/directives/Morph.sass'
-/* Components */
-${componentsCss}
-/* Plugins */
-${pluginsCss}
-@import 'quasar/src/plugins/Loading.sass'
-@import 'quasar/src/plugins/Notify.sass'
-/* CSS */
-${css?.map((v) => `@import '${v}'`).join('\n')}
-`
+  const additinalData = []
+  if (sassVariables) {
+    additinalData.push(`@import ${sassVariables}`)
+  }
+    additinalData.push(
+      `@import 'quasar/src/css/variables.sass'`,
+      `@import 'quasar/src/css/helpers/string.sass'`,
+      `@import 'quasar/src/css/helpers/math.sass'`,
+      `@import 'quasar/src/css/normalize.sass'`,
+      `@import 'quasar/src/css/core/animations.sass'`,
+      `@import 'quasar/src/css/core/colors.sass'`,
+      `@import 'quasar/src/css/core/elevation.sass'`,
+      `@import 'quasar/src/css/core/flex.sass'`,
+      `@import 'quasar/src/css/core/helpers.sass'`,
+      `@import 'quasar/src/css/core/mouse.sass'`,
+      `@import 'quasar/src/css/core/orientation.sass'`,
+      `@import 'quasar/src/css/core/positioning.sass'`,
+      `@import 'quasar/src/css/core/size.sass'`,
+      `@import 'quasar/src/css/core/touch.sass'`,
+      `@import 'quasar/src/css/core/transitions.sass'`,
+      `@import 'quasar/src/css/core/typography.sass'`,
+      `@import 'quasar/src/css/core/visibility.sass'`,
+      `@import 'quasar/src/css/core/dark.sass'`,
+      `@import 'quasar/src/directives/Ripple.sass'`,
+      `@import 'quasar/src/directives/Morph.sass'`,
+      ...componentsCss,
+      ...pluginsCss,
+      `@import 'quasar/src/plugins/Loading.sass'`,
+      `@import 'quasar/src/plugins/Notify.sass'`,
+      ...css?.map((v) => `@import '${v}'`)
+    )
+
+  return additinalData
 }
+
 const importExportLiteral = (imports: string[] = [], exports: string[] = []) => `${imports.join('\n')}
 
 export default {
@@ -224,6 +234,11 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
     quasarConf.framework.plugins = [...new Set(quasarConf.framework.plugins)];
   }
 
+  let sassVariables: string | false = false
+  if (existsSync(configuration.appPaths.resolve.src('quasar-variables.sass'))) {
+    sassVariables = 'src/quasar-variables.sass'
+  }
+
   return [
     {
       name: 'legacy-support',
@@ -300,7 +315,13 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
           css: {
             preprocessorOptions: {
               sass: {
-                additionalData: additionalDataSass(quasarConf?.framework.components, quasarConf?.framework.plugins, quasarConf?.css)
+                additionalData: additionalDataSass(
+                  {
+                    components: quasarConf?.framework.components,
+                    plugins: quasarConf?.framework.plugins,
+                    css: quasarConf?.css,
+                    sassVariables: sassVariables
+                  }).join('\n') + '\n'  // New line required to prevent compilation errors (auto-import does not prepend a new line probably)
               }
             },
           }
