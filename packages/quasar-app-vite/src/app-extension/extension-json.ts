@@ -1,7 +1,7 @@
 import fs from 'fs'
-import { log, fatal } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
+import { log, fatal } from '@stefanvh/quasar-app-vite/helpers/logger'
 import chalk from 'chalk'
-import { AppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
+import { AppPaths } from '@stefanvh/quasar-app-vite/app-paths'
 
 class ExtensionJson {
   extensionPath: string

@@ -1,7 +1,7 @@
-import { AppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
-import { fatal } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
-// import getPackageJson from '@stefanvh/quasar-app-vite/lib/helpers/get-package-json'
-import ExtensionJson from '@stefanvh/quasar-app-vite/lib/app-extension/extension-json'
+import { AppPaths } from '@stefanvh/quasar-app-vite/app-paths'
+import { fatal } from '@stefanvh/quasar-app-vite/helpers/logger'
+// import getPackageJson from '@stefanvh/quasar-app-vite/helpers/get-package-json'
+import ExtensionJson from '@stefanvh/quasar-app-vite/app-extension/extension-json'
 
 /**
  * API for extension's /index.js script

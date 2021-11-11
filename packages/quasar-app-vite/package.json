@@ -4,17 +4,24 @@
   "author": "Stefan van Herwijnen",
   "license": "MIT",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "build": "tsc"
+  },
   "exports": {
-    ".": "./dist/src/index.js",
-    "./*": "./dist/src/*.js",
-    "./lib/*": "./dist/lib/*.js",
-    "./build": "./dist/src/node/build.js",
-    "./dev": "./dist/src/node/dev.js",
-    "./help": "./dist/src/node/help.js"
+    ".": "./dist/index.js",
+    "./*": "./dist/*.js",
+    "./build": "./dist/node/build.js",
+    "./dev": "./dist/node/dev.js",
+    "./help": "./dist/node/help.js",
+    "./main": "./src/main.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "./*": ["./dist/types/*"]
+    }
   },
   "bin": {
-    "quasar-vite": "./dist/src/node/quasar-vite.js"
+    "quasar-vite": "./dist/node/quasar-vite.js"
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^1.9.2",
@@ -37,6 +44,7 @@
     "workbox-window": "^6.3.0"
   },
   "devDependencies": {
+    "@types/compression": "^1.7.2",
     "@types/express": "^4.17.13",
     "@types/glob": "^7.1.4",
     "@types/merge-deep": "^3.0.0",

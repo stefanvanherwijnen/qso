@@ -12,6 +12,7 @@ import * as directives from 'quasar/src/directives'
 
 interface ssrContext {
   ssr: boolean
+  provide?: Record<string, unknown>
   [key: string]: unknown
 }
 
@@ -31,6 +32,12 @@ export function createApp (ssrContext?: ssrContext) {
   }, ssrContext)
 
   app.use(router)
+
+  if (ssrContext) {
+    for (let key in ssrContext.provide) {
+      app.provide(key, ssrContext.provide[key])
+    }
+  }
 
   for (let fn of Object.values(bootFunctions)) {
     fn({ app })

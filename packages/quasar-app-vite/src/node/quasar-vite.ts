@@ -47,7 +47,7 @@ if (cmd) {
       process.exit(0)
     }
 
-    const { log, warn } = await import('@stefanvh/quasar-app-vite/lib/helpers/logger')
+    const { log, warn } = await import('@stefanvh/quasar-app-vite/helpers/logger')
 
     if (cmd === '-h' || cmd === '--help') {
       cmd = 'help'

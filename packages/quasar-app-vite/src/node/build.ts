@@ -2,7 +2,7 @@
 import { build } from 'vite'
 import { resolve } from 'path'
 
-import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
+import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/app-paths'
 import { baseConfig } from '@stefanvh/quasar-app-vite'
 
 import parseArgs from 'minimist'
@@ -26,16 +26,13 @@ const argv = parseArgs(process.argv.slice(2), {
 })
 
 async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg' }) {
+  const appPaths = await getAppPaths()
   const {
     appDir,
-    srcDir,
-    cliDir
-  } = await getAppPaths()
+  } = appPaths
 
   let config = await baseConfig({
-    cliDir,
-    appDir,
-    srcDir,
+    appPaths,
     ssr: opts?.ssr
   })
 

@@ -3,8 +3,8 @@ import path from 'path'
 import { green } from 'chalk'
 import { Plugin } from 'vite'
 
-import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
-import { log, warn, fatal, error } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
+import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/app-paths'
+import { log, warn, fatal, error } from '@stefanvh/quasar-app-vite/helpers/logger'
 import { VitePWAOptions } from 'vite-plugin-pwa'
 
 import merge from 'merge-deep'

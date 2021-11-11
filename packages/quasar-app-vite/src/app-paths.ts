@@ -14,7 +14,7 @@ async function getAppDir (initialAppDir?: string): Promise<string> {
     dir = normalize(join(dir, '..'))
   }
 
-  const { fatal } = await import('@stefanvh/quasar-app-vite/lib/helpers/logger')
+  const { fatal } = await import('@stefanvh/quasar-app-vite//helpers/logger')
 
   return fatal(`Error. This command must be executed inside a Quasar v1+ project folder.`)
 }
@@ -31,7 +31,7 @@ async function getCliDir (): Promise<string> {
     dir = normalize(join(dir, '..'))
   }
 
-  const { fatal } = await import('@stefanvh/quasar-app-vite/lib/helpers/logger')
+  const { fatal } = await import('@stefanvh/quasar-app-vite/helpers/logger')
 
   return fatal(`Error. Vite configuration file not found.`)
 }

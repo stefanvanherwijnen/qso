@@ -2,11 +2,11 @@ import type { Plugin, ResolvedConfig } from 'vite'
 import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa'
 import Components from 'unplugin-vue-components/vite'
 import { resolve } from 'path'
-import { generateImportMap, parseAutoImport } from '@stefanvh/quasar-app-vite/lib/import-map'
-import { AppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
+import { generateImportMap, parseAutoImport } from '@stefanvh/quasar-app-vite/import-map'
+import { AppPaths } from '@stefanvh/quasar-app-vite/app-paths'
 import { existsSync } from 'fs'
 import { join, sep, normalize } from 'path'
-import { fatal } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
+import { fatal } from '@stefanvh/quasar-app-vite/helpers/logger'
 function getQuasarDir () {
   let dir = process.cwd()
 
@@ -21,9 +21,9 @@ function getQuasarDir () {
 export const quasarDir = getQuasarDir()
 if (!quasarDir) fatal('Quasar directory not found')
 const { map: importMap, autoImport } = generateImportMap(quasarDir!)
-import IndexAPI from '@stefanvh/quasar-app-vite/lib/app-extension/IndexAPI'
-import Extension from '@stefanvh/quasar-app-vite/lib/app-extension/Extension'
-import { QuasarConf } from '@stefanvh/quasar-app-vite/lib/quasar-conf-file'
+import IndexAPI from '@stefanvh/quasar-app-vite/app-extension/IndexAPI'
+import Extension from '@stefanvh/quasar-app-vite/app-extension/Extension'
+import { QuasarConf } from '@stefanvh/quasar-app-vite/quasar-conf-file'
 const imported: string[] = []
 
 const additionalDataSass = ({
@@ -146,18 +146,18 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
   let quasarConf: QuasarConf
   let quasarExtensions: Record<string, any> | undefined
 
-  const QuasarConfFile = (await import('@stefanvh/quasar-app-vite/lib/quasar-conf-file')).default
+  const QuasarConfFile = (await import('@stefanvh/quasar-app-vite/quasar-conf-file')).default
   const QuasarConf = new QuasarConfFile(ctx, configuration.appPaths)
   quasarConf = await QuasarConf.get()
 
   // if (configuration?.appPaths && configuration?.loadQuasarConf) {
-  //   const QuasarConfFile = (await import('@stefanvh/quasar-app-vite/lib/quasar-conf-file')).default
+  //   const QuasarConfFile = (await import('@stefanvh/quasar-app-vite/quasar-conf-file')).default
   //   const QuasarConf = new QuasarConfFile(ctx, configuration.appPaths)
   //   quasarConf = await QuasarConf.get()
   // }
 
   if (configuration?.appPaths && configuration?.loadQuasarExtensions) {
-    const ExtensionJson = (await import('@stefanvh/quasar-app-vite/lib/app-extension/extension-json')).default
+    const ExtensionJson = (await import('@stefanvh/quasar-app-vite/app-extension/extension-json')).default
     quasarExtensions = new ExtensionJson(configuration.appPaths).getList() || {}
   }
 

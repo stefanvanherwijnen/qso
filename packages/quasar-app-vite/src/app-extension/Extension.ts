@@ -1,5 +1,5 @@
-import { fatal } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
-import { AppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
+import { fatal } from '@stefanvh/quasar-app-vite/helpers/logger'
+import { AppPaths } from '@stefanvh/quasar-app-vite/app-paths'
 import { existsSync, readFileSync } from 'fs'
 import { resolve } from 'path'
 export default class Extension {

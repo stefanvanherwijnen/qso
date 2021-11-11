@@ -11,21 +11,14 @@
     "baseUrl": "./",
     "resolveJsonModule": true,
     "outDir": "./dist",
+    "declaration": true,
+    "declarationDir": "dist/types",
     "paths": {
-      // "@stefanvh/quasar-app-vite/build": ["./*"],
       "@stefanvh/quasar-app-vite": ["./src/index"],
       "@stefanvh/quasar-app-vite/*": ["./src/*"],
-      "@stefanvh/quasar-app-vite/lib/*": ["./lib/*"]
     }
   },
   "include": [
-    "src/**/*",
-    "lib/**/*"
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "module": "ES2020",
-      "esModuleInterop": true
-    }
-  }
+    "src"
+  ]
 }

@@ -1,11 +1,11 @@
 import vuePlugin from '@vitejs/plugin-vue'
-import { QuasarPlugin } from '@stefanvh/quasar-app-vite'
+import { QuasarPlugin } from '@stefanvh/quasar-app-vite/vite-plugin-quasar'
 import { resolve } from 'path'
 import { Plugin } from 'vite'
-import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
+import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/app-paths'
 import { readFileSync, existsSync } from 'fs'
 import { sep, normalize, join } from 'path'
-import { fatal } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
+import { fatal } from '@stefanvh/quasar-app-vite/helpers/logger'
 export * from '@stefanvh/quasar-app-vite/vite-plugin-quasar'
 
 export type VitePlugins = (paths: AppPaths) => Plugin[]
@@ -22,17 +22,14 @@ const resolveNodeModules = (initialDir: string, pkgName: string) => {
   }
 }
 export const baseConfig = async ({
-  cliDir,
-  srcDir,
-  appDir,
-  ssr
+  ssr,
+  appPaths
 }: {
-  cliDir: string,
-  srcDir: string,
-  appDir: string,
-  ssr?: 'client' | 'server' | 'ssg'
+  ssr?: 'client' | 'server' | 'ssg',
+  appPaths: AppPaths
 }) => {
-  const appPaths = await getAppPaths()
+  // const appPaths = await getAppPaths(initialAppDir)
+  const { cliDir, srcDir, appDir } = appPaths
   // try {
   //   quasarConf = (await import(resolve(appDir, 'quasar.conf.js'))).default
   // } catch (e) {
@@ -71,7 +68,6 @@ export const baseConfig = async ({
         { find: '@quasar/extras', replacement: resolveNodeModules(appDir, '@quasar/extras') || resolve(appDir, 'node_modules', '@quasar', 'extras') },
         { find: 'quasarConf', replacement: resolve(appDir, 'quasar.conf') },
         { find: 'quasarExtensions', replacement: resolve(appDir, 'quasar.extensions.json') }
-
       ]
     },
     ssr: {

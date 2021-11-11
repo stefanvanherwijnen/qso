@@ -2,9 +2,9 @@ import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import express, { Express } from 'express'
 import { LogLevel, ViteDevServer } from 'vite'
-import { printHttpServerUrls, log } from '@stefanvh/quasar-app-vite/lib/helpers/logger'
+import { printHttpServerUrls, log } from '@stefanvh/quasar-app-vite/helpers/logger'
 import { baseConfig, VitePlugins } from '@stefanvh/quasar-app-vite'
-import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/lib/app-paths'
+import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/app-paths'
 import parseArgs from 'minimist'
 import { searchForWorkspaceRoot } from 'vite'
 import { Server } from 'net'
@@ -38,11 +38,8 @@ export async function createServer ({
     logLevel: 'info',
     mode: 'csr'
   }) {
-  const {
-    appDir,
-    srcDir,
-    cliDir
-  } = await getAppPaths()
+  const appPaths = await getAppPaths()
+  const { cliDir, appDir, srcDir } = appPaths
 
   /**
    * @type {import('vite').ViteDevServer}
@@ -51,10 +48,8 @@ export async function createServer ({
   vite = await (await import('vite')).createServer({
     configFile: false,
     ...(await baseConfig({
-      cliDir,
-      srcDir,
-      appDir,
-      ssr: mode === 'ssr' ? 'client' : undefined
+      ssr: mode === 'ssr' ? 'client' : undefined,
+      appPaths
     })),
     logLevel,
     server: {

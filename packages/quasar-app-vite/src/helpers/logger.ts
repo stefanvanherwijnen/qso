@@ -10,7 +10,7 @@ import readline from 'readline'
 import { AddressInfo, Server } from 'net'
 import { ResolvedConfig, Logger } from 'vite'
 import os from 'os'
-import { resolveHostname, Hostname } from '@stefanvh/quasar-app-vite/lib/helpers/utils'
+import { resolveHostname, Hostname } from '@stefanvh/quasar-app-vite/helpers/utils'
 
 /**
  * Main approach - App CLI related
