@@ -307,9 +307,9 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
             __DEV__: process.env.NODE_ENV !== 'production' || true,
             // Does not work
             __QUASAR_VERSION__: `'version'`,
-            __QUASAR_SSR__: 'asdf',
-            __QUASAR_SSR_SERVER__: 'asdf'+(configuration.ssr === 'server').toString(),
-            __QUASAR_SSR_CLIENT__: 'asdf'+(configuration.ssr === 'client').toString(),
+            __QUASAR_SSR__: !!configuration.ssr,
+            __QUASAR_SSR_SERVER__: configuration.ssr === 'server',
+            __QUASAR_SSR_CLIENT__: configuration.ssr === 'client',
             __QUASAR_SSR_PWA__: !!configuration.ssr && isPwa
           },
           css: {
