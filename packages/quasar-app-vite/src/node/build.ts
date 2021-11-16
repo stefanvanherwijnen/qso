@@ -52,15 +52,23 @@ async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg' }) {
       break
   }
 
+  config.build = {
+    ...config.build,
+    minify: false,
+    outDir,
+    emptyOutDir: true,
+    rollupOptions:{
+      output: {
+        format: 'esm'
+      }
+    }
+  }
+
+  console.log(config)
   return build({
     configFile: false,
     // logLevel: 'silent',
-    ...config,
-    build: {
-      minify: false,
-      outDir,
-      emptyOutDir: true
-    }
+    ...config
   })
 }
 

@@ -284,11 +284,11 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
       enforce: 'pre',
       transform (code, id, ssr) {
         // Required for the ssr argument during ssr builds (combined config for server and client)
-        code = code.replace(/__QUASAR_VERSION__/g, `'version'`)
-          .replace(/__QUASAR_SSR__/g, (!!ssr).toString())
-          .replace(/__QUASAR_SSR_SERVER__/g, (!!ssr).toString())
-          .replace(/__QUASAR_SSR_CLIENT__/g, false.toString())
-          .replace(/__QUASAR_SSR_PWA__/g, (!!ssr && isPwa).toString())
+        // code = code.replace(/__QUASAR_VERSION__/g, `'version'`)
+        //   .replace(/__QUASAR_SSR__/g, (!!configuration.ssr).toString())
+        //   .replace(/__QUASAR_SSR_SERVER__/g, (configuration.ssr === 'server').toString())
+        //   .replace(/__QUASAR_SSR_CLIENT__/g, (configuration.ssr === 'client').toString())
+        //   .replace(/__QUASAR_SSR_PWA__/g, (!!configuration.ssr && isPwa).toString())
         return code
       },
       config: (config, env) => {
@@ -300,17 +300,17 @@ export const QuasarPlugin = async (configuration: Configuration): Promise<Plugin
             ssr: (configuration?.ssr === 'server' && configuration?.appPaths?.cliDir) ? resolve(configuration.appPaths.cliDir, 'ssr', 'entry-server.ts') : false,
             ssrManifest: configuration?.ssr === 'client'
           },
-          ssr: {
-            noExternal: configuration?.ssr ? ['quasar'] : undefined
-          },
+          // ssr: {
+          //   noExternal: configuration?.ssr ? ['quasar'] : undefined
+          // },
           define: {
             __DEV__: process.env.NODE_ENV !== 'production' || true,
             // Does not work
-            // __QUASAR_VERSION__: 'version',
-            // __QUASAR_SSR__: false,
-            // __QUASAR_SSR_SERVER__: false,
-            // __QUASAR_SSR_CLIENT__: false,
-            // __QUASAR_SSR_PWA__: false
+            __QUASAR_VERSION__: `'version'`,
+            __QUASAR_SSR__: 'asdf',
+            __QUASAR_SSR_SERVER__: 'asdf'+(configuration.ssr === 'server').toString(),
+            __QUASAR_SSR_CLIENT__: 'asdf'+(configuration.ssr === 'client').toString(),
+            __QUASAR_SSR_PWA__: !!configuration.ssr && isPwa
           },
           css: {
             preprocessorOptions: {
