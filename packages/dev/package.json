@@ -26,12 +26,13 @@
     "yarn": ">= 1.21.1"
   },
   "dependencies": {
-    "@quasar/extras": "^1.11.2",
-    "quasar": "^2.1.0",
+    "@quasar/extras": "^1.12.0",
+    "quasar": "^2.3.2",
     "vue": "^3.2.20",
     "vue-router": "^4.0.11"
   },
   "devDependencies": {
-    "@stefanvh/quasar-app-vite": "^0.4.0"
+    "@stefanvh/quasar-app-vite": "^0.5.0",
+    "pug": "^3.0.2"
   }
 }
