@@ -8,17 +8,17 @@ import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/app-paths'
 import parseArgs from 'minimist'
 import { searchForWorkspaceRoot } from 'vite'
 import { Server } from 'net'
-import fastify, { FastifyInstance } from 'fastify'
-import middie from 'middie'
 
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
     m: 'mode',
+    p: 'plugins',
+    h: 'host'
   },
   string: ['m', 'host'],
   default: {
     m: 'csr',
-    host: '127.0.0.1'
+    h: false
   }
 })
 
@@ -32,7 +32,7 @@ export async function createServer ({
     port?: number,
     logLevel?: LogLevel,
     mode?: 'csr' | 'ssr',
-    host?: string
+    host?: boolean
   } = {
     port: 3000,
     logLevel: 'info',
@@ -45,46 +45,42 @@ export async function createServer ({
    * @type {import('vite').ViteDevServer}
    */
   let vite: ViteDevServer
-  const config = (await baseConfig({
-    ssr: mode === 'ssr' ? 'server' : undefined,
-    appPaths
-  }))
-  config.logLevel = logLevel
-  config.server = {
-    port,
-    middlewareMode: mode === 'ssr' ? 'ssr' : undefined,
-    fs: {
-      allow: [
-        searchForWorkspaceRoot(process.cwd()),
-        cliDir,
-        appDir,
-      ]
-    },
-    watch: {
-      // During tests we edit the files too fast and sometimes chokidar
-      // misses change events, so enforce polling for consistency
-      usePolling: true,
-      interval: 100
-    },
-    host
-  }
   vite = await (await import('vite')).createServer({
     configFile: false,
-    ...config
+    ...(await baseConfig({
+      ssr: mode === 'ssr' ? 'client' : undefined,
+      appPaths
+    })),
+    logLevel,
+    server: {
+      port,
+      middlewareMode: mode === 'ssr' ? 'ssr' : undefined,
+      fs: {
+        allow: [
+          searchForWorkspaceRoot(process.cwd()),
+          cliDir,
+          appDir,
+        ]
+      },
+      watch: {
+        // During tests we edit the files too fast and sometimes chokidar
+        // misses change events, so enforce polling for consistency
+        usePolling: true,
+        interval: 100
+      },
+      host
+    }
   })
-  let app: ViteDevServer | FastifyInstance
+  let app: ViteDevServer | Express
   let server: Server
   if (mode === 'ssr') {
     console.log('SSR mode')
-    // app = express()
-    app = fastify()
-    await app.register(middie)
+    app = express()
     app.use(vite.middlewares)
 
-    app.get('*', async (req, res) => {
+    app.use('*', async (req, res) => {
       try {
-        // const url = req.originalUrl
-        const url = req.raw.url
+        const url = req.originalUrl
 
         let template
         let render
@@ -105,19 +101,14 @@ export async function createServer ({
           .replace(`<!--preload-links-->`, preloadLinks)
           .replace(`<!--app-html-->`, appHtml)
 
-        res.code(200)
-        res.type('text/html')
-        res.send(html)
-        // res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
-      } catch (e: any) {
-        console.error(e.stack)
-        vite && vite.ssrFixStacktrace(e)
-        res.code(500)
-        res.send(e.stack)
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
+      } catch (e) {
+        vite && vite.ssrFixStacktrace(e as Error)
+        console.log((e as Error).stack)
+        res.status(500).end((e as Error).stack)
       }
     })
-    await app.listen(port || 3000, host || '127.0.0.1')
-    server = app.server
+    server = await app.listen()
   } else {
     server = (await vite.listen()).httpServer as Server
   }
@@ -127,7 +118,6 @@ export async function createServer ({
 
 let server: Server
 let vite: ViteDevServer
-
 switch (argv.mode) {
   case 'ssr':
     ({ server, vite } = await createServer({

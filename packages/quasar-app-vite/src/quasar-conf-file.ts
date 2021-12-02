@@ -1,18 +1,18 @@
 import { readFileSync, existsSync } from 'fs'
 import path from 'path'
 import { green } from 'chalk'
-import { Plugin } from 'vite'
+import { Plugin, UserConfig } from 'vite'
 
 import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/app-paths'
 import { log, warn, fatal, error } from '@stefanvh/quasar-app-vite/helpers/logger'
 import { VitePWAOptions } from 'vite-plugin-pwa'
 
 import merge from 'merge-deep'
+import { FastifyInstance } from 'fastify'
 export interface QuasarConf {
   ctx: Record<string, any>
   css: string[],
   boot: string[],
-  build: Record<string, any>
   framework: {
     config: Record<string, any>
     components: string[],
@@ -21,15 +21,13 @@ export interface QuasarConf {
   },
   animations: string[],
   extras: string[],
+  /** vite-plugin-pwa settings */
   pwa?: VitePWAOptions,
-  bex: {
-    builder: {
-      directories: {}
-    }
-  },
-  vite?: {
-    alias: Record<string, string> | Array<{ find: string | RegExp, replacement: string }>,
-    plugins: Plugin[]
+  /** Vite config is merged using a plugin */
+  vite?: UserConfig,
+  fastify?: {
+    /** setup() is called directly after instantiating fastify. Use it to register your own plugins, routes etc. */
+    setup: (fastify: FastifyInstance) => any
   }
 }
 
@@ -68,12 +66,7 @@ class QuasarConfFile {
 
     const cfg = merge({
       ctx: this.ctx,
-      css: [],
-      boot: [],
-      vendor: {
-        add: [],
-        remove: []
-      },
+      /** Legacy support */
       build: {
         transpileDependencies: [],
         vueLoaderOptions: {
@@ -90,7 +83,8 @@ class QuasarConfFile {
           mangle: {}
         }
       },
-      devServer: {},
+      css: [],
+      boot: [],
       framework: {
         components: [],
         directives: [],
@@ -98,26 +92,10 @@ class QuasarConfFile {
       },
       animations: [],
       extras: [],
-      sourceFiles: {},
-      ssr: {
-        middlewares: []
-      },
-      // pwa: {
-      //   workboxOptions: {},
-      //   manifest: {
-      //     icons: []
-      //   },
-      //   metaVariables: {}
-      // },
-      bin: {},
-      bex: {
-        builder: {
-          directories: {}
-        }
-      },
-      htmlVariables: {},
       vite: {
-        alias: []
+        resolve: {
+          alias: []
+        }
       }
     },
       initialConf

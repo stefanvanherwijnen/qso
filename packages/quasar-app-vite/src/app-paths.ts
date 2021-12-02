@@ -7,7 +7,11 @@ async function getAppDir (initialAppDir?: string): Promise<string> {
   let dir = initialAppDir || process.cwd()
 
   while (dir.length && dir[dir.length - 1] !== sep) {
-    if (fs.existsSync(join(dir, 'quasar.conf.js')) || fs.existsSync(join(dir, 'quasar.conf.ts'))) {
+    if (
+      fs.existsSync(join(dir, 'quasar.conf.js')) ||
+      // fs.existsSync(join(dir, 'quasar.conf.ts')) ||
+      fs.existsSync(join(dir, 'node_modules', 'quasar'))
+    ) {
       return dir
     }
 

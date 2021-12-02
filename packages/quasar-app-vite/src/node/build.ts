@@ -20,12 +20,13 @@ const argv = parseArgs(process.argv.slice(2), {
   },
   // boolean: ['h', 'd', 'u', 'i'],
   // string: ['m', 'T', 'P'],
+  string: ['base', 'outDir'],
   default: {
     m: 'csr'
   }
 })
 
-async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg' }) {
+async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg', base?: string, outDir?: string }) {
   const appPaths = await getAppPaths()
   const {
     appDir,
@@ -37,18 +38,19 @@ async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg' }) {
   })
 
   let outDir
+  let baseOutDir = opts?.outDir || resolve(appDir, 'dist')
   switch (opts?.ssr) {
     case 'server':
-      outDir = resolve(appDir, 'dist', 'ssr', 'server')
+      outDir = resolve(baseOutDir, 'ssr', 'server')
       break;
     case 'client':
-      outDir = resolve(appDir, 'dist', 'ssr', 'client')
+      outDir = resolve(baseOutDir, 'ssr', 'client')
       break;
     case 'ssg':
-      outDir = resolve(appDir, 'dist', 'static')
+      outDir = resolve(baseOutDir, 'static')
       break;
     default:
-      outDir = resolve(appDir, 'dist', 'spa')
+      outDir = resolve(baseOutDir, 'spa')
       break
   }
 
@@ -59,14 +61,15 @@ async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg' }) {
     emptyOutDir: true,
     rollupOptions:{
       output: {
-        format: 'esm'
+        format: 'es'
       }
     }
   }
 
-  console.log(config)
+
   return build({
     configFile: false,
+    base: opts?.base,
     // logLevel: 'silent',
     ...config
   })
@@ -74,20 +77,29 @@ async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg' }) {
 
 switch (argv.mode) {
   case 'csr':
-    await buildQuasar()
+    await buildQuasar({
+      base: argv.base,
+      outDir: argv.outDir
+    })
     break;
   case 'ssr':
     await buildQuasar({
-      ssr: 'client'
+      ssr: 'client',
+      base: argv.base,
+      outDir: argv.outDir
     })
     await buildQuasar({
-      ssr: 'server'
+      ssr: 'server',
+      base: argv.base,
+      outDir: argv.outDir
     })
     break;
   case 'ssg':
     console.log('Prerendering not supported yet')
     await buildQuasar({
-      ssr: 'ssg'
+      ssr: 'ssg',
+      base: argv.base,
+      outDir: argv.outDir
     })
     break;
   default:

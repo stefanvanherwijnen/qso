@@ -7,6 +7,7 @@ import { readFileSync, existsSync } from 'fs'
 import { sep, normalize, join } from 'path'
 import { fatal } from '@stefanvh/quasar-app-vite/helpers/logger'
 export * from '@stefanvh/quasar-app-vite/vite-plugin-quasar'
+import builtinModules from 'builtin-modules'
 
 export type VitePlugins = (paths: AppPaths) => Plugin[]
 
@@ -81,30 +82,43 @@ export const baseConfig = async ({
         loadQuasarExtensions: true
       })
     ],
-    resolve: {
-      dedupe: [
-        'vue',
-        'vue-router'
-      ],
+    resolve: {  
+      // Dedupe uses require which breaks ESM SSR builds
+      // dedupe: [
+      //   'vue',
+      //   'vue-router'
+      // ],
       alias: [
-        { find: 'src', replacement: srcDir },
-        { find: 'app', replacement: appDir },
-        { find: 'boot', replacement: resolve(srcDir, 'boot') },
-        { find: 'assets', replacement: resolve(srcDir, 'assets') },
-        { find: 'dist', replacement: resolve('dist') },
-        { find: 'quasar/wrappers', replacement: resolve(cliDir, 'quasar-wrappers.ts') },
-        { find: 'quasar', replacement: resolve(appDir, 'node_modules', 'quasar') },
+        // { find: 'vue', replacement: resolve(appDir, 'node_modules', 'vue') },
+
+        // { find: 'src', replacement: srcDir },
+        // { find: 'app', replacement: appDir },
+        // { find: 'boot', replacement: resolve(srcDir, 'boot') },
+        // { find: 'assets', replacement: resolve(srcDir, 'assets') },
+        // // { find: 'dist', replacement: resolve('dist') },
+        // { find: 'quasar/wrappers', replacement: resolve(cliDir, 'quasar-wrappers.ts') },
+        // { find: 'quasar/vue-plugin', replacement: resolve(quasarDir, 'src', 'vue-plugin.js') },
+        // { find: 'quasar/directives', replacement: resolve(quasarDir, 'src', 'directives.js') },
+        // { find: 'quasar/src', replacement: resolve(quasarDir, 'src') },
+
+        // { find: 'quasar', replacement: resolve(appDir, 'node_modules', 'quasar', 'src', 'index.all.js') },
+        // { find: '@quasar/extras', replacement: resolveNodeModules(appDir, '@quasar/extras') || resolve(appDir, 'node_modules', '@quasar', 'extras') },
+
         // { find: '@quasar/extras', replacement: resolve(appDir, 'node_modules', '@quasar', 'extras') },
+
         // { find: 'quasar/', replacement: quasarDir + '/' },
-        // { find: 'quasar', replacement: resolve(quasarDir, 'src', 'index.all.js') },
-        { find: '@quasar/extras', replacement: resolveNodeModules(appDir, '@quasar/extras') || resolve(appDir, 'node_modules', '@quasar', 'extras') },
-        { find: 'quasarConf', replacement: resolve(appDir, 'quasar.conf') },
-        { find: 'quasarExtensions', replacement: resolve(appDir, 'quasar.extensions.json') }
+        // { find: 'quasarConf', replacement: resolve(appDir, 'quasar.conf') },
+        // { find: 'quasarExtensions', replacement: resolve(appDir, 'quasar.extensions.json') }
       ]
     },
-    // // @ts-ignore
-    // ssr: {
-    //   noExternal: ssr === 'server' ? ['quasar'] : []
-    // }
+    // @ts-ignore
+    ssr: {
+      // external: builtinModules,
+      // Externalize only Node built in modules and fastify and express in order to create a bundle
+      noExternal: [
+        new RegExp(`^(?!.*(${builtinModules.join('|')}|fastify|express))`)
+      ]
+      // noExternal: ssr === 'server' ? ['quasar'] : []
+    }
   }
 }

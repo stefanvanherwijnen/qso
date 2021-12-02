@@ -3,11 +3,12 @@ import { renderToString } from '@vue/server-renderer'
 // import * as ApolloSSR from '@vue/apollo-ssr'
 // import { ApolloClients } from '@vue/apollo-composable'
 // import serialize from 'serialize-javascript'
+export { setup } from 'virtual:fastify-setup'
 
 export async function render (url, manifest, ssrContext) {
   const { app, router } = createApp(ssrContext)
   // set the router to the desired URL before rendering
-  router.push(url)
+  router.push({ path: url })
 
 
   // const initialState = {
@@ -29,6 +30,7 @@ export async function render (url, manifest, ssrContext) {
   // which we can then use to determine what files need to be preloaded for this
   // request.
   const preloadLinks = renderPreloadLinks(ctx.modules, manifest)
+
   return [html, preloadLinks]
 }
 

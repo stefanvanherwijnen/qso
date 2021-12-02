@@ -1,14 +1,13 @@
 import App from 'src/App.vue'
 import createRouter from 'src/router'
-
+// import { createRouter, createWebHashHistory } from 'vue-router'
 import { createSSRApp, createApp as createVueApp } from 'vue'
-import QuasarPlugin from 'quasar/src/vue-plugin'
-import { quasarExtensions } from 'virtual:quasar-extensions'
+import { Quasar, Dialog } from 'quasar'
 import quasarComponents from 'virtual:quasar-components'
 import quasarPlugins from 'virtual:quasar-plugins'
 import bootFunctions from 'virtual:quasar-boot'
 import 'virtual:quasar-extras'
-import * as directives from 'quasar/src/directives'
+import * as directives from 'quasar/directives'
 
 interface ssrContext {
   ssr: boolean
@@ -24,16 +23,18 @@ export function createApp (ssrContext?: ssrContext) {
     app = createVueApp(App)
   }
   const router = createRouter()
+  app.use(router)
 
-  app.use(QuasarPlugin, {
-    plugins: quasarPlugins,
+  console.log(quasarPlugins)
+  app.use(Quasar, {
+    plugins: {
+      Dialog
+    },
     components: quasarComponents,
     directives
   }, ssrContext)
 
-  app.use(router)
-
-  if (ssrContext) {
+  if (ssrContext && ssrContext.provide) {
     for (let key in ssrContext.provide) {
       app.provide(key, ssrContext.provide[key])
     }

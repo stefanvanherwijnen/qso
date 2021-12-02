@@ -1,9 +1,6 @@
 export default function (ctx) {
   return {
-    boot: [
-      'test.js',
-      'qcalendar.js'
-    ],
+    boot: [],
     extras: [
       'material-icons'
     ],
@@ -15,21 +12,10 @@ export default function (ctx) {
         'Notify'
       ]
     },
-    css: [
-      '~@quasar/quasar-ui-qcalendar/src/index.sass'
-    ],
     vite: {
       // build: {
       //   minify: true
       // },
-      resolve: {
-        alias: [
-          // { find: '@quasar/quasar-ui-qcalendar', replacement: '@quasar/quasar-ui-qcalendar/src/index' }
-        ]
-      },
-      optimizeDeps: {
-        exclude: ['@quasar/quasar-ui-qcalendar']
-      },
       plugins: [
         {
           name: 'test-plugin',

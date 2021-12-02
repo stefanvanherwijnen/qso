@@ -67,7 +67,7 @@ export function generateImportMap (quasarRoot: string) {
         if (existsSync(resolvePath(file.replace('.js', '.sass')))) sideEffects.push(file.replace('.js', '.sass'))
 
         map[name] = {
-          file: file,
+          file,
           sideEffects
         }
 
@@ -87,7 +87,7 @@ export function generateImportMap (quasarRoot: string) {
           kebab = 'v-' + kebabCase(name)
 
         map[name] = {
-          file: file
+          file
         }
 
         autoImport.kebabComponents.push(kebab)
@@ -103,8 +103,12 @@ export function generateImportMap (quasarRoot: string) {
       .map(relative)
       .forEach(file => {
         const name = getWithoutExtension(basename(file))
+        const sideEffects = []
+        if (existsSync(resolvePath(file.replace('.js', '.sass')))) sideEffects.push(file.replace('.js', '.sass'))
+
         map[name] = {
-          file: file
+          file,
+          sideEffects
         }
       })
   }

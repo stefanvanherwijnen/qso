@@ -1,4 +1,5 @@
 ## Roadmap
+
 - [ ] Finish the roadmap
 - [x] Create an executable which can be executed inside a Quasar project
 - [ ] Add development and production server commands
@@ -11,6 +12,7 @@
 - [ ] Finish the Quasar Vite plugin
   - [x] Make it compatible with default Vue Vite projects
   - [x] Make sure that all auto-imports work correctly
+  - [ ] Support TypeScript quasar.conf file
 - [ ] Port Quasar features
   - [x] Boot files
   - [] App extensions
