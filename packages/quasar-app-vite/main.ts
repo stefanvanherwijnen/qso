@@ -1,6 +1,5 @@
 import App from 'src/App.vue'
 import createRouter from 'src/router'
-// import { createRouter, createWebHashHistory } from 'vue-router'
 import { createSSRApp, createApp as createVueApp } from 'vue'
 import { Quasar, Dialog } from 'quasar'
 import quasarComponents from 'virtual:quasar-components'
@@ -25,11 +24,8 @@ export function createApp (ssrContext?: ssrContext) {
   const router = createRouter()
   app.use(router)
 
-  console.log(quasarPlugins)
   app.use(Quasar, {
-    plugins: {
-      Dialog
-    },
+    plugins: quasarPlugins,
     components: quasarComponents,
     directives
   }, ssrContext)
