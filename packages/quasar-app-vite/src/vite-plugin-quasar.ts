@@ -127,7 +127,8 @@ export const QuasarPlugin = async ({
         ...pluginsCss,
         `@import 'quasar/src/plugins/Loading.sass'`,
         `@import 'quasar/src/plugins/Notify.sass'`,
-        `@import 'quasar/src/components/Dialog/Dialog.sass'`,
+        `@import 'quasar/src/components/dialog/QDialog.sass'`,
+        `@import 'quasar/src/components/dialog-plugin/DialogPlugin.sass'`,
         ...css?.map((v) => `@import '${v}'`)
       )
   
