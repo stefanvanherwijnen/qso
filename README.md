@@ -22,6 +22,10 @@ Run `pnpm i` in the root folder and `pnpm exec quasar-app-vite [command]` in any
 
 ## Usage
 
+### Developers
+
+After cloning the repo, run `pnpm i && pnpm run build`.
+
 ### Commands
 
 Use `pnpm exec` to run the following commands:
