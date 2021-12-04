@@ -32,7 +32,7 @@
     "quasar": "^2.3.2"
   },
   "devDependencies": {
-    "@stefanvh/quasar-app-vite": "^0.6.2",
+    "@stefanvh/quasar-app-vite": "^0.6.3",
     "pug": "^3.0.2"
   }
 }
