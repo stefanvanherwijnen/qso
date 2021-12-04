@@ -340,8 +340,8 @@ export const QuasarPlugin = async ({
               { find: new RegExp('^quasar$'), replacement: resolve(appDir, 'node_modules', 'quasar', 'src', 'index.all.js') },
               // { find: '@quasar/extras', replacement: resolve(cliDir, 'node_modules', '@quasar', 'extras') },
               /** Alternative to dedupe */
-              { find: 'vue', replacement: resolve(cliDir, 'node_modules', 'vue') },
-              { find: 'vue-router', replacement: resolve(cliDir, 'node_modules', 'vue-router') },
+              { find: 'vue', replacement: resolve(appDir, 'node_modules', 'vue') },
+              { find: 'vue-router', replacement: resolve(appDir, 'node_modules', 'vue-router') },
             ]
           },
           build: {
