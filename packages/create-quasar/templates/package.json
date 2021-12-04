@@ -1,0 +1,20 @@
+{
+  "name": "{{ packageJson.name }}",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "{{ packageJson.description }}",
+  "scripts": {
+    "dev": "quasar-vite dev",
+    "build": "quasar-vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "{{ packageJson.author }}",
+  "license": "{{ packageJson.license }}",
+  "dependencies": {
+    "@quasar/extras": "^1.12.1",
+    "quasar": "^2.3.3"
+  },
+  "devDependencies": {
+    "@stefanvh/quasar-app-vite": "^0.6.2"
+  }
+}

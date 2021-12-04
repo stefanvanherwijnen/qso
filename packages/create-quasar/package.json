@@ -1,0 +1,29 @@
+{
+  "name": "create-quasar-app-extension",
+  "version": "0.1.0",
+  "main": "dist/cli.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "render": "node dist/cli.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stefanvanherwijnen/quasar-app-vite.git",
+    "directory": "packages/create-quasar"
+  },
+  "author": "Stefan van Herwijnen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stefanvanherwijnen/quasar-app-vite/issues"
+  },
+  "homepage": "https://github.com/stefanvanherwijnen/quasar-app-vite/packages/create-quasar#readme",
+  "dependencies": {
+    "handlebars": "^4.7.7",
+    "minimist": "^1.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.11"
+  }
+}
