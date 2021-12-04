@@ -18,7 +18,7 @@ This project is set up as a monorepo:
 - `packages/example-typescript`: A minimal working example of a typescript project
 - `packages/vite-project`: A standard Vite project modified to work with Quasar with just the QuasarPlugin
 
-Run `pnpm i` in the root folder and `pnpm exec quasar-app-vite [command]` in any of the Quasar project folders.
+Run `pnpm i` in the root folder and `pnpm exec quasar-vite [command]` in any of the Quasar project folders.
 
 ## Usage
 
