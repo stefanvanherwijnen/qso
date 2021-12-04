@@ -11,6 +11,8 @@
   "author": "{{ packageJson.author }}",
   "license": "{{ packageJson.license }}",
   "dependencies": {
+    "vue": "^3.2.23",
+    "vue-router": "^4.0.12",
     "@quasar/extras": "^1.12.1",
     "quasar": "^2.3.3"
   },

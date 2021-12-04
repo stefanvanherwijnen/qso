@@ -78,7 +78,6 @@ export const renderTemplate = ({
   template: string,
   outputDir: URL
 }) => {
-  console.log(outputDir)
   if (outputDir.pathname[outputDir.pathname.length - 1] !== '/') {
     throw new Error('outputDir is not a directory. Make sure the URL ends with a /')
   }

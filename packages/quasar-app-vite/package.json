@@ -45,8 +45,6 @@
     "unplugin-vue-components": "^0.15.6",
     "vite": "^2.7.0-beta.8",
     "vite-plugin-pwa": "^0.11.5",
-    "vue": "^3.2.23",
-    "vue-router": "^4.0.12",
     "workbox-build": "^6.3.0",
     "workbox-window": "^6.3.0"
   },
@@ -58,7 +56,7 @@
     "@types/minimist": "^1.2.2",
     "@vue/server-renderer": "^3.2.22",
     "builtin-modules": "^3.2.0",
-    "typescript": "^4.4.3"
+    "typescript": "^4.5.2"
   },
   "peerDependencies": {
     "vue": "^3.2.23",
