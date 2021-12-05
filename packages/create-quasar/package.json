@@ -1,5 +1,5 @@
 {
-  "name": "create-quasar-app-extension",
+  "name": "create-quasar",
   "version": "0.1.0",
   "main": "dist/cli.js",
   "type": "module",
