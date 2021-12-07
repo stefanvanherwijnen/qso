@@ -8,6 +8,9 @@ import bootFunctions from 'virtual:quasar-boot'
 import 'virtual:quasar-extras'
 import * as directives from 'quasar/directives'
 
+const plugins = quasarPlugins
+const components = quasarComponents
+
 interface ssrContext {
   ssr: boolean
   provide?: Record<string, unknown>
@@ -25,8 +28,8 @@ export function createApp (ssrContext?: ssrContext) {
   app.use(router)
 
   app.use(Quasar, {
-    plugins: quasarPlugins,
-    components: quasarComponents,
+    plugins,
+    components,
     directives
   }, ssrContext)
 
@@ -36,7 +39,7 @@ export function createApp (ssrContext?: ssrContext) {
     }
   }
 
-  for (let fn of Object.values(bootFunctions)) {
+  for (let fn of bootFunctions) {
     fn({ app })
   }
 

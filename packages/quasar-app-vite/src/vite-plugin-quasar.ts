@@ -4,9 +4,16 @@ import Components from 'unplugin-vue-components/vite'
 import { resolve } from 'path'
 import { generateImportMap, parseAutoImport } from '@stefanvh/quasar-app-vite/import-map'
 import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/app-paths'
-import { existsSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import { join, sep, normalize } from 'path'
 import { fatal } from '@stefanvh/quasar-app-vite/helpers/logger'
+
+import virtualQuasarConf from './virtual/conf.js'
+import virtualQuasarExtensions from './virtual/extensions.js'
+import virtualQuasarPlugins from './virtual/plugins.js'
+import virtualQuasarComponents from './virtual/components.js'
+import virtualQuasarExtras from './virtual/extras.js'
+import virtualQuasarBootFiles from './virtual/boot.js'
 // function getQuasarDir () {
 //   let dir = process.cwd()
 
@@ -125,10 +132,14 @@ export const QuasarPlugin = async ({
         `@import 'quasar/src/components/field//QField.sass'`,
         ...componentsCss,
         ...pluginsCss,
+        /**
+         * SASS which is not autoloaded
+         */
         `@import 'quasar/src/plugins/Loading.sass'`,
         `@import 'quasar/src/plugins/Notify.sass'`,
         `@import 'quasar/src/components/dialog/QDialog.sass'`,
         `@import 'quasar/src/components/dialog-plugin/DialogPlugin.sass'`,
+        `@import 'quasar/src/composables/private/use-panel.sass'`,
         ...css?.map((v) => `@import '${v}'`)
       )
   
@@ -146,7 +157,7 @@ export const QuasarPlugin = async ({
   let quasarConf: QuasarConf
   let quasarExtensions: Record<string, any> | undefined
 
-  let bootFilePaths: Record<string, any> = {}
+  let bootFilePaths: string[]
   let fastifySetup = (fastify: FastifyInstance) => {}
   let sassVariables: string | false = false
 
@@ -161,37 +172,37 @@ export const QuasarPlugin = async ({
     //   quasarConf = await QuasarConf.get()
     // }
 
-    if (loadQuasarExtensions) {
-      const ExtensionJson = (await import('@stefanvh/quasar-app-vite/app-extension/extension-json')).default
-      quasarExtensions = new ExtensionJson(appPaths).getList() || {}
-    }
+    // if (loadQuasarExtensions) {
+    //   const ExtensionJson = (await import('@stefanvh/quasar-app-vite/app-extension/extension-json')).default
+    //   quasarExtensions = new ExtensionJson(appPaths).getList() || {}
+    // }
 
-    if (quasarExtensions) {
-      let hooks: Record<string, any> = {}
-      const names = Object.keys(quasarExtensions)
-      // await Object.entries(configuration.quasarExtensions).forEach(async ([key, value]) => {
-      for (let index in names) {
-        const name = names[index]
-        const ext = new Extension(name, appPaths)
-        const scripts = ext.scripts()
-        const indexScript = await import(scripts.index)
-        const indexApi = new IndexAPI({
-          extId: name,
-          ctx,
-          appPaths: appPaths
-        })
+    // if (quasarExtensions) {
+    //   let hooks: Record<string, any> = {}
+    //   const names = Object.keys(quasarExtensions)
+    //   // await Object.entries(configuration.quasarExtensions).forEach(async ([key, value]) => {
+    //   for (let index in names) {
+    //     const name = names[index]
+    //     const ext = new Extension(name, appPaths)
+    //     const scripts = ext.scripts()
+    //     const indexScript = await import(scripts.index)
+    //     const indexApi = new IndexAPI({
+    //       extId: name,
+    //       ctx,
+    //       appPaths: appPaths
+    //     })
 
-        indexScript.default(indexApi)
-        hooks = {
-          ...hooks,
-          ...indexApi.__getHooks()
-        }
+    //     indexScript.default(indexApi)
+    //     hooks = {
+    //       ...hooks,
+    //       ...indexApi.__getHooks()
+    //     }
 
-        for (let extendQuasarConf of hooks.extendQuasarConf) {
-          extendQuasarConf.fn(quasarConf)
-        }
-      }
-    }
+    //     for (let extendQuasarConf of hooks.extendQuasarConf) {
+    //       extendQuasarConf.fn(quasarConf)
+    //     }
+    //   }
+    // }
 
     if (quasarConf?.pwa) {
       isPwa = true
@@ -212,6 +223,31 @@ export const QuasarPlugin = async ({
     }
 
     if (quasarConf.boot) {
+      // bootFilePaths = (quasarConf.boot as (Record<string, any> | string)[])
+      //   .filter(entry => {
+      //     if (typeof entry === 'object') return (entry.server && (ssr === 'server'))
+      //     else if (entry !== '') return true
+      //   })
+      //   .map(entry => {
+      //     if (typeof entry === 'string') return entry
+      //     else if (typeof entry === 'object') return entry.path
+      //   })
+      //   .reduce((acc, entry) => {
+      //     if (entry[0] === '~') {
+      //       const split = entry.substring(1).split('/')
+      //       const name = split.slice(0, split.length - 2).join('').replace(/[|&;$%@"<>()+,]/g, "");
+      //       acc[name] = {
+      //         // path: `/node_modules/${entry.substring(1)}`
+      //         path: `${entry.substring(1)}`
+      //       }
+      //     } else {
+      //       const name = entry.split('.')[0]
+      //       acc[name] = {
+      //         path: `/src/boot/${entry}`
+      //       }
+      //     }
+      //     return acc
+      //   }, {})
       bootFilePaths = (quasarConf.boot as (Record<string, any> | string)[])
         .filter(entry => {
           if (typeof entry === 'object') return (entry.server && (ssr === 'server'))
@@ -221,22 +257,16 @@ export const QuasarPlugin = async ({
           if (typeof entry === 'string') return entry
           else if (typeof entry === 'object') return entry.path
         })
-        .reduce((acc, entry) => {
+        .map(entry => {
           if (entry[0] === '~') {
             const split = entry.substring(1).split('/')
             const name = split.slice(0, split.length - 2).join('').replace(/[|&;$%@"<>()+,]/g, "");
-            acc[name] = {
-              // path: `/node_modules/${entry.substring(1)}`
-              path: `${entry.substring(1)}`
-            }
+            return `${entry.substring(1)}`
           } else {
             const name = entry.split('.')[0]
-            acc[name] = {
-              path: `/src/boot/${entry}`
-            }
+            return `src/boot/${entry}`
           }
-          return acc
-        }, {})
+        })
     }
 
     if (quasarConf.framework.components) {
@@ -336,8 +366,11 @@ export const QuasarPlugin = async ({
               { find: 'quasar/directives', replacement: resolve(quasarDir, 'src', 'directives.js') },
               { find: 'quasar/src', replacement: resolve(quasarDir, 'src') },
       
+              { find: '/quasar/src', replacement: resolve(quasarDir, 'src') },
+
               // { find: 'quasar', replacement: resolve(appDir, 'node_modules', 'quasar', 'src', 'index.all.js') },
               { find: new RegExp('^quasar$'), replacement: resolve(appDir, 'node_modules', 'quasar', 'src', 'index.all.js') },
+
               // { find: '@quasar/extras', replacement: resolve(cliDir, 'node_modules', '@quasar', 'extras') },
               /** Alternative to dedupe */
               { find: 'vue', replacement: resolve(appDir, 'node_modules', 'vue') },
@@ -408,36 +441,44 @@ export const QuasarPlugin = async ({
       },
       load (id) {
         if (id === 'virtual:quasar-conf') {
-          return `export const quasarConf = ${JSON.stringify(quasarConf || {})}`
+          return virtualQuasarConf
+          // return `export const quasarConf = ${JSON.stringify(quasarConf || {})}`
         }
         if (id === 'virtual:quasar-extensions') {
-          return `export const quasarExtensions = ${JSON.stringify(quasarExtensions || {})}`
+          if (appPaths) {
+            let extensions = JSON.parse(readFileSync(appPaths?.resolve.app('quasar.extensions.json'), { encoding: 'utf-8'}))
+            return virtualQuasarExtensions(Object.keys(extensions))
+          }
+          // return `export const quasarExtensions = ${JSON.stringify(quasarExtensions || {})}`
         }
         if (id === 'virtual:quasar-plugins') {
-            const plugins = quasarConf?.framework?.plugins
-            const imports = plugins?.map((plugin: string) => `import ${plugin} from 'quasar/src/plugins/${plugin}.js'`)
-            return importExportLiteral(imports, plugins)
+            return virtualQuasarPlugins
+            // const plugins = quasarConf?.framework?.plugins
+            // const imports = plugins?.map((plugin: string) => `import ${plugin} from 'quasar/src/plugins/${plugin}.js'`)
+            // return importExportLiteral(imports, plugins)
         }
         if (id === 'virtual:quasar-components') {
-            const components = quasarConf?.framework?.components
-            const imports = components?.map((component: string) => `import ${component} from 'quasar/${importMap[component].file}'`)
-            // const sideEffects = components
-            //   ?.filter((component: string) => importMap[component].sideEffects)
-            //   ?.map((component: string) => `@import 'quasar/${importMap[component].sideEffects}'`)
-            return {
-              code: importExportLiteral(imports, components),
-              moduleSideEffects: 'no-treeshake'
-            }
+          return virtualQuasarComponents
+            // const components = quasarConf?.framework?.components
+            // const imports = components?.map((component: string) => `import ${component} from 'quasar/${importMap[component].file}'`)
+            // // const sideEffects = components
+            // //   ?.filter((component: string) => importMap[component].sideEffects)
+            // //   ?.map((component: string) => `@import 'quasar/${importMap[component].sideEffects}'`)
+            // return {
+            //   code: importExportLiteral(imports, components),
+            //   moduleSideEffects: 'no-treeshake'
+            // }
         }
         if (id === 'virtual:quasar-extras') {
-            const extras = quasarConf?.extras
-            const imports = extras?.map((extra: string) => `import ${lowerCamelCase(extra)} from '@quasar/extras/${extra}/${extra}.css'`)
-            return importExportLiteral(imports, extras?.map((extra: string) => lowerCamelCase(extra)))      
+          return virtualQuasarExtras
+            // const extras = quasarConf?.extras
+            // const imports = extras?.map((extra: string) => `import ${lowerCamelCase(extra)} from '@quasar/extras/${extra}/${extra}.css'`)
+            // return importExportLiteral(imports, extras?.map((extra: string) => lowerCamelCase(extra)))      
         }
         if (id === 'virtual:quasar-boot') {
-            const bootFiles = Object.keys(bootFilePaths)
-            const imports = bootFiles?.map((boot: string) => `import ${lowerCamelCase(boot)} from '${bootFilePaths[boot].path}'`)
-            return importExportLiteral(imports, bootFiles?.map((boot: string) => lowerCamelCase(boot)))
+          return virtualQuasarBootFiles(bootFilePaths)
+            // const imports = bootFiles?.map((boot: string) => `import ${lowerCamelCase(boot)} from '${bootFilePaths[boot].path}'`)
+            // return importExportLiteral(imports, bootFiles?.map((boot: string) => lowerCamelCase(boot)))
         }
         if (id === 'virtual:fastify-setup') {
             return `export const setup = ${String(fastifySetup)}`

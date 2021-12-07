@@ -56,6 +56,7 @@ async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg', base?: s
 
   config.build = {
     ...config.build,
+    target: 'esnext',
     minify: false,
     outDir,
     emptyOutDir: true,

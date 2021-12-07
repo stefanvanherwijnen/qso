@@ -5,6 +5,7 @@ export default function (ctx) {
       'qcalendar.js'
     ],
     extras: [
+      'mdi-v5',
       'material-icons'
     ],
     framework: {

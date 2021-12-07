@@ -26,7 +26,7 @@ importers:
   packages/dev:
     specifiers:
       '@quasar/extras': ^1.12.0
-      '@stefanvh/quasar-app-vite': ^0.6.2
+      '@stefanvh/quasar-app-vite': ^0.6.3
       pug: ^3.0.2
       quasar: ^2.3.2
       vue: ^3.2.23
@@ -45,7 +45,7 @@ importers:
       '@quasar/extras': ^1.12.1
       '@quasar/quasar-app-extension-qcalendar': ^4.0.0-beta.11
       '@quasar/quasar-ui-qcalendar': ^4.0.0-beta.11
-      '@stefanvh/quasar-app-vite': ^0.6.2
+      '@stefanvh/quasar-app-vite': ^0.6.3
       quasar: ^2.3.3
       quasar-app-extension-http-authentication: ^2.0.1-beta.19
       quasar-ui-http-authentication: ^2.0.1-beta.19
@@ -56,7 +56,7 @@ importers:
       '@quasar/quasar-app-extension-qcalendar': 4.0.0-beta.11
       '@quasar/quasar-ui-qcalendar': 4.0.0-beta.11
       quasar: 2.3.3
-      quasar-app-extension-http-authentication: 2.0.1-beta.20_f17f8a210b9d35533de3aa84c5410bb1
+      quasar-app-extension-http-authentication: link:../../../../Personal/quasar-app-extension-http-authentication/packages/app-extension
       quasar-ui-http-authentication: 2.0.1-beta.20_f17f8a210b9d35533de3aa84c5410bb1
       vue: 3.2.23
       vue-router: 4.0.12_vue@3.2.23
@@ -66,7 +66,7 @@ importers:
   packages/example-typescript:
     specifiers:
       '@quasar/extras': ^1.12.1
-      '@stefanvh/quasar-app-vite': ^0.6.2
+      '@stefanvh/quasar-app-vite': ^0.6.3
       quasar: ^2.3.3
       vue: ^3.2.23
       vue-router: ^4.0.12
@@ -144,7 +144,7 @@ importers:
   packages/vite-project:
     specifiers:
       '@quasar/extras': ^1.12.1
-      '@stefanvh/quasar-app-vite': ^0.6.2
+      '@stefanvh/quasar-app-vite': ^0.6.3
       '@vitejs/plugin-vue': ^1.10.0
       quasar: ^2.3.3
       typescript: ^4.4.3
@@ -3700,18 +3700,6 @@ packages:
   /qs/6.7.0:
     resolution: {integrity: sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==}
     engines: {node: '>=0.6'}
-    dev: false
-
-  /quasar-app-extension-http-authentication/2.0.1-beta.20_f17f8a210b9d35533de3aa84c5410bb1:
-    resolution: {integrity: sha512-Ew04ctRp1N/8U7LFs5fzSzGu5yDB82qYeYfaRoERJzdfEyHhUGqW59WsU3UX8vR5RBaphlTb8zQ5elruf0vRtQ==}
-    engines: {node: '>= 8.9.0', npm: '>= 5.6.0', yarn: '>= 1.6.0'}
-    peerDependencies:
-      quasar: ^2.3.2
-    dependencies:
-      quasar: 2.3.3
-      quasar-ui-http-authentication: 2.0.1-beta.20_f17f8a210b9d35533de3aa84c5410bb1
-    transitivePeerDependencies:
-      - '@quasar/extras'
     dev: false
 
   /quasar-ui-http-authentication/2.0.1-beta.20_f17f8a210b9d35533de3aa84c5410bb1:

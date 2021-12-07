@@ -1,8 +1,21 @@
-import { renderTemplate } from './index.js'
+import { renderTemplate } from './render.js'
 import parseArgs from 'minimist'
 import { pathToFileURL } from 'url'
 import inquirer, { QuestionCollection } from 'inquirer'
 import { promises } from 'fs'
+
+const templateVariables = {
+  packageJson: {
+    name: 'Test',
+    author: 'John',
+    description: 'Description',
+    license: 'License',
+    dependencies: []
+  },
+  app: {
+    title: 'Test'
+  }
+}
 
 const templates = (await promises.readdir(new URL('../templates/', import.meta.url), { withFileTypes: true }))
   .filter((file) => file.isDirectory())
@@ -35,5 +48,6 @@ const cwdUrl = pathToFileURL(`${process.cwd()}/`)
 
 renderTemplate({
   template,
-  outputDir: new URL(`./${argv._[0] || argv.template}/`, cwdUrl)
+  outputDir: new URL(`./${argv._[0] || argv.template}/`, cwdUrl),
+  templateVariables
 })

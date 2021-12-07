@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-btn label="About" to="/about"></q-btn>
+    <q-btn label="About" icon="person" to="/about"></q-btn>
     <q-btn label="Login" to="/login"></q-btn>
     <q-btn label="QCalendar" to="/qcalendar"></q-btn>
     <router-view />
@@ -9,14 +9,15 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, getCurrentInstance } from 'vue'
-// import Dialog from 'quasar/src/plugins/Dialog.js'
+import { useQuasar } from 'quasar'
 export default defineComponent({
   components: {
   },
   setup() {
-    const vm = getCurrentInstance()
-    console.log(vm)
-
+    const $q = useQuasar()
+    $q.notify({
+      message: 'Test'
+    })
     return {
 
     }

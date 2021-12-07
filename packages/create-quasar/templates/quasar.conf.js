@@ -11,7 +11,12 @@ export default function (ctx) {
       ]
     },
     vite: {
-
+      optimizeDeps: {
+        exclude: [
+          '@quasar/quasar-ui-qcalendar',
+          '@quasar/quasar-ui-qmarkdown'
+        ]
+      },
     },
     fastify: {
       

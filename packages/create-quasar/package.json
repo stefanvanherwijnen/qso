@@ -1,11 +1,15 @@
 {
   "name": "create-quasar",
   "version": "0.1.0",
-  "main": "dist/cli.js",
   "type": "module",
+  "main": "./dist/cli.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./render": "./dist/render.js"
+  },
+  "types": "dist/types",
   "scripts": {
     "build": "tsc",
-    "render": "node dist/cli.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
