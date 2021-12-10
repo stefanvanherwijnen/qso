@@ -9,13 +9,18 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, getCurrentInstance } from 'vue'
+import { useQuasar } from 'quasar'
 // import Dialog from 'quasar/src/plugins/Dialog.js'
 export default defineComponent({
   components: {
   },
   setup() {
-    const vm = getCurrentInstance()
-    console.log(vm)
+    const $q = useQuasar()
+    setTimeout(() => {
+    $q.dialog({
+      message: 'Test'
+    })
+    }, 1000)
 
     return {
 

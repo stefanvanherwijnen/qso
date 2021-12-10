@@ -1,45 +1,27 @@
 import vuePlugin from '@vitejs/plugin-vue'
-import { QuasarPlugin } from '@stefanvh/quasar-app-vite/vite-plugin-quasar'
-import { resolve } from 'path'
-import { Plugin, InlineConfig } from 'vite'
-import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/app-paths'
+import { InlineConfig } from 'vite'
 import { readFileSync, existsSync } from 'fs'
-import { sep, normalize, join } from 'path'
-import { fatal } from '@stefanvh/quasar-app-vite/helpers/logger'
-export * from '@stefanvh/quasar-app-vite/vite-plugin-quasar'
+import { QuasarPlugin } from './vite-plugin-quasar.js'
 import builtinModules from 'builtin-modules'
+import { getAppExtensionPath } from './app-extension/api.js'
+import { appDir, cliDir, srcDir } from './app-urls.js'
 
-export type VitePlugins = (paths: AppPaths) => Plugin[]
-
-const resolveNodeModules = (initialDir: string, pkgName: string) => {
-  let dir = initialDir
-
-  while (dir.length && dir[dir.length - 1] !== sep) {
-    if (existsSync(join(dir, 'node_modules', pkgName))) {
-      return join(dir, 'node_modules', pkgName)
-    }
-
-    dir = normalize(join(dir, '..'))
-  }
-}
 export const baseConfig = async ({
   ssr,
-  appPaths
 }: {
-  ssr?: 'client' | 'server' | 'ssg',
-  appPaths: AppPaths
+  ssr?: 'client' | 'server' | 'ssg'
 }): Promise<InlineConfig> => {
-  // const appPaths = await getAppPaths(initialAppDir)
-  const { cliDir, srcDir, appDir } = appPaths
-  // try {
-  //   quasarConf = (await import(resolve(appDir, 'quasar.conf.js'))).default
-  // } catch (e) {
-  //   fatal('quasar.conf.js not found. Aborting...')
-  // }
+  /**
+   * TODO:Perform some manual check if command is run inside a Quasar Project
+   */
+  //  const appDir = new URL(`file://${process.cwd()}/`)
+   const quasarConf = (await import(new URL('quasar.conf.js', appDir).pathname)).default
+   const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
 
-  // try {
-  //   quasarExtensions = JSON.parse(readFileSync(resolve(appDir, 'quasar.extensions.json'), 'utf-8'))
-  // } catch (e) { }
+   let quasarExtensions
+   if (existsSync(quasarExtensionsPath)) {
+    quasarExtensions = JSON.parse(readFileSync(quasarExtensionsPath, { encoding: 'utf-8' }))
+   }
 
   const ssrTransformCustomDir = () => {
     return {
@@ -48,11 +30,52 @@ export const baseConfig = async ({
     }
   }
 
-  let quasarDir = resolveNodeModules(appDir, 'quasar')|| resolve(appDir, 'node_modules', 'quasar' )
-
+  let quasarExtensionIndexScripts = []
+  if (quasarExtensions) {
+    for (let ext of Object.keys(quasarExtensions)) {
+      const path = getAppExtensionPath(ext)
+      const packageJson = JSON.parse(readFileSync(new URL(`node_modules/${path}/package.json`, appDir).pathname, 'utf-8'))
+      const exports = packageJson.exports
+      quasarExtensionIndexScripts.push((await import(new URL(exports['./index'], new URL(`node_modules/${path}/`, appDir)).pathname)).default)
+    }
+  }
+  // let input: string | string[] = new URL('index.html', cliDir).pathname
+  // if (ssr === 'server') {
+  //   input = [
+  //     new URL('ssr/entry-server.ts', cliDir).pathname,
+  //     new URL('ssr/server.ts', cliDir).pathname
+  //   ]
+  // }
+  
   return {
-    root: appDir,
+    root: appDir.pathname,
     plugins: [
+      {
+        name: 'html-transform',
+        enforce: 'pre',
+        transformIndexHtml: {
+          enforce: 'pre',
+          transform: (html) => {
+              let entry: string
+              switch (ssr) {
+                case 'server' || 'client':
+                  // entry = new URL('../ssr/entry-client.ts', import.meta.url).pathname
+                  entry = new URL('ssr/entry-client.ts', cliDir).pathname
+                  
+                  break;
+                default:
+                  entry = new URL('csr/entry.ts', cliDir).pathname
+                  // entry = new URL('../csr/entry.ts', import.meta.url).pathname
+              const entryScript = `<script type="module" src="${entry}"></script>`
+              html = html.replace(
+                '<!--entry-script-->',
+                entryScript
+              )
+            }
+            return html
+          }
+        }
+      },
       vuePlugin(
         {
           template: {
@@ -75,13 +98,15 @@ export const baseConfig = async ({
           }
         }
       ),
-      await QuasarPlugin({
-        appPaths,
+      QuasarPlugin({
+        quasarConf,
+        quasarExtensionIndexScripts,
         ssr: ssr,
-        loadQuasarConf: true,
-        loadQuasarExtensions: true
       })
     ],
+    optimizeDeps: {
+      exclude: ['vue']
+    },
     resolve: {  
       // Dedupe uses require which breaks ESM SSR builds
       // dedupe: [
@@ -89,36 +114,35 @@ export const baseConfig = async ({
       //   'vue-router'
       // ],
       alias: [
-        // { find: 'vue', replacement: resolve(appDir, 'node_modules', 'vue') },
-
-        // { find: 'src', replacement: srcDir },
-        // { find: 'app', replacement: appDir },
-        // { find: 'boot', replacement: resolve(srcDir, 'boot') },
-        // { find: 'assets', replacement: resolve(srcDir, 'assets') },
-        // // { find: 'dist', replacement: resolve('dist') },
-        // { find: 'quasar/wrappers', replacement: resolve(cliDir, 'quasar-wrappers.ts') },
-        // { find: 'quasar/vue-plugin', replacement: resolve(quasarDir, 'src', 'vue-plugin.js') },
-        // { find: 'quasar/directives', replacement: resolve(quasarDir, 'src', 'directives.js') },
-        // { find: 'quasar/src', replacement: resolve(quasarDir, 'src') },
-
-        // { find: 'quasar', replacement: resolve(appDir, 'node_modules', 'quasar', 'src', 'index.all.js') },
-        // { find: '@quasar/extras', replacement: resolveNodeModules(appDir, '@quasar/extras') || resolve(appDir, 'node_modules', '@quasar', 'extras') },
-
-        // { find: '@quasar/extras', replacement: resolve(appDir, 'node_modules', '@quasar', 'extras') },
-
-        // { find: 'quasar/', replacement: quasarDir + '/' },
-        // { find: 'quasarConf', replacement: resolve(appDir, 'quasar.conf') },
-        // { find: 'quasarExtensions', replacement: resolve(appDir, 'quasar.extensions.json') }
+        { find: 'src', replacement: srcDir.pathname },
+        { find: 'app', replacement: appDir.pathname },
+        { find: 'boot', replacement: new URL('boot/', srcDir).pathname },
+        { find: 'assets', replacement: new URL('assets/', srcDir).pathname },
+        { find: 'vue', replacement: new URL('node_modules/vue', appDir).pathname },
+        { find: 'vue-router', replacement: new URL('node_modules/vue-router', appDir).pathname }
       ]
+    },
+    build: {
+      ssr: (ssr === 'server') ? true : false,
+      ssrManifest: ssr === 'client',
+      rollupOptions: {
+        input: (ssr === 'server') ? [
+          new URL('ssr/entry-server.ts', cliDir).pathname,
+          new URL('ssr/server.ts', cliDir).pathname
+        ] : undefined,
+        output: {
+          format: 'es'
+        }
+      }
     },
     // @ts-ignore
     ssr: {
-      // external: builtinModules,
       // Externalize only Node built in modules and fastify and express in order to create a bundle
       noExternal: [
         new RegExp(`^(?!.*(${builtinModules.join('|')}|fastify|express))`)
       ]
-      // noExternal: ssr === 'server' ? ['quasar'] : []
     }
   }
 }
+
+export { QuasarPlugin }

@@ -1,7 +1,7 @@
 import App from 'src/App.vue'
 import createRouter from 'src/router'
 import { createSSRApp, createApp as createVueApp } from 'vue'
-import { Quasar, Dialog } from 'quasar'
+import { Quasar } from 'quasar'
 import quasarComponents from 'virtual:quasar-components'
 import quasarPlugins from 'virtual:quasar-plugins'
 import bootFunctions from 'virtual:quasar-boot'

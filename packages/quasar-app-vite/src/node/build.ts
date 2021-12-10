@@ -1,11 +1,9 @@
 #!/usr/bin/node --experimental-specifier-resolution=node
 import { build } from 'vite'
 import { resolve } from 'path'
-
-import { AppPaths, getAppPaths } from '@stefanvh/quasar-app-vite/app-paths'
-import { baseConfig } from '@stefanvh/quasar-app-vite'
-
+import { baseConfig } from '../index.js'
 import parseArgs from 'minimist'
+import { appDir } from '../app-urls.js'
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
     m: 'mode',
@@ -27,30 +25,30 @@ const argv = parseArgs(process.argv.slice(2), {
 })
 
 async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg', base?: string, outDir?: string }) {
-  const appPaths = await getAppPaths()
-  const {
-    appDir,
-  } = appPaths
-
   let config = await baseConfig({
-    appPaths,
     ssr: opts?.ssr
   })
 
   let outDir
-  let baseOutDir = opts?.outDir || resolve(appDir, 'dist')
+  let baseOutDir
+  if (opts?.outDir) {
+    if (opts.outDir.slice(-1) !== '/') opts.outDir + '/'
+    baseOutDir = new URL(`file://${opts.outDir}`)
+  } else {
+    baseOutDir = new URL('dist/', appDir)
+  }
   switch (opts?.ssr) {
     case 'server':
-      outDir = resolve(baseOutDir, 'ssr', 'server')
+      outDir = new URL('ssr/server/', baseOutDir).pathname
       break;
     case 'client':
-      outDir = resolve(baseOutDir, 'ssr', 'client')
+      outDir = new URL('ssr/client', baseOutDir).pathname
       break;
     case 'ssg':
-      outDir = resolve(baseOutDir, 'static')
+      outDir = new URL('static/', baseOutDir).pathname
       break;
     default:
-      outDir = resolve(baseOutDir, 'spa')
+      outDir = new URL('spa/', baseOutDir).pathname
       break
   }
 
@@ -58,12 +56,7 @@ async function buildQuasar (opts?: { ssr?: 'client' | 'server' | 'ssg', base?: s
     ...config.build,
     minify: false,
     outDir,
-    emptyOutDir: true,
-    rollupOptions:{
-      output: {
-        format: 'es'
-      }
-    }
+    emptyOutDir: true
   }
 
 

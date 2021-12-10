@@ -7,6 +7,18 @@
 </template>
 
 <script setup>
+import { useQuery } from '@urql/vue'
+
+const result = useQuery({
+  query: `
+    {
+      todos {
+        id
+        title
+      }
+    }
+  `
+})
 
 </script>
 

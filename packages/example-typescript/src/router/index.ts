@@ -10,7 +10,7 @@ export default function createRouter() {
     // import.meta.env.SSR is injected by Vite.
     history: import.meta.env.SSR ? createMemoryHistory() : createWebHistory(),
     routes: [
-      { path: '/', component: import('../pages/Home.vue') }
+      { path: '/', component: () => import('../pages/Home.vue') }
     ]
   })
 }

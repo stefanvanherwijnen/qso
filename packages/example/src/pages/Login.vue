@@ -7,6 +7,5 @@
 </template>
 
 <script setup>
-
 </script>
 
