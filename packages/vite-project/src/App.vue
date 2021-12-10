@@ -14,8 +14,17 @@ $q.dialog({
 
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
+  <q-card>
+    <q-card-section>
+
+    </q-card-section>
+  </q-card>
   <!-- <HelloWorld msg="Hello Quasar 2 + TypeScript + Vite" /> -->
 </template>
+
+<style lang="sass">
+// required
+</style>
 
 <style>
 #app {

@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
-import { Quasar, Dialog } from 'quasar'
+import { Quasar } from 'quasar'
+import plugins from 'virtual:quasar-plugins'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -13,9 +14,8 @@ const router = createRouter({
 const app = createApp(App)
 
 app.use(router)
+
 app.use(Quasar, {
-  plugins: {
-    Dialog
-  }
+  plugins
 })
 app.mount('#app')
