@@ -14,7 +14,6 @@ export const baseConfig = async ({
   /**
    * TODO:Perform some manual check if command is run inside a Quasar Project
    */
-  //  const appDir = new URL(`file://${process.cwd()}/`)
    const quasarConf = (await import(new URL('quasar.conf.js', appDir).pathname)).default
    const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
 
@@ -39,13 +38,6 @@ export const baseConfig = async ({
       quasarExtensionIndexScripts.push((await import(new URL(exports['./index'], new URL(`node_modules/${path}/`, appDir)).pathname)).default)
     }
   }
-  // let input: string | string[] = new URL('index.html', cliDir).pathname
-  // if (ssr === 'server') {
-  //   input = [
-  //     new URL('ssr/entry-server.ts', cliDir).pathname,
-  //     new URL('ssr/server.ts', cliDir).pathname
-  //   ]
-  // }
   
   return {
     root: appDir.pathname,
@@ -59,13 +51,10 @@ export const baseConfig = async ({
               let entry: string
               switch (ssr) {
                 case 'server' || 'client':
-                  // entry = new URL('../ssr/entry-client.ts', import.meta.url).pathname
                   entry = new URL('ssr/entry-client.ts', cliDir).pathname
-                  
                   break;
                 default:
                   entry = new URL('csr/entry.ts', cliDir).pathname
-                  // entry = new URL('../csr/entry.ts', import.meta.url).pathname
               const entryScript = `<script type="module" src="${entry}"></script>`
               html = html.replace(
                 '<!--entry-script-->',

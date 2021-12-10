@@ -1,7 +1,6 @@
 import type { Plugin } from 'vite'
-import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa'
+import { VitePWA } from 'vite-plugin-pwa'
 import Components from 'unplugin-vue-components/vite'
-import { QuasarResolver } from 'unplugin-vue-components/resolvers'
 import { prepareQuasarConf } from './quasar-conf-file.js'
 import { FastifyInstance } from 'fastify'
 import { appDir, cliDir, quasarDir } from './app-urls.js'
@@ -34,11 +33,6 @@ export const QuasarPlugin = ({
   quasarExtensionIndexScripts,
 }: Configuration = {}): Plugin[] => {
   const extraPlugins: Plugin[] = []
-  // const appDir = new URL(`file://${process.cwd()}/`)
-  // const cliDir = new URL('../', import.meta.url)
-  // const srcDir = new URL('src/', appDir)
-  // const quasarDir = new URL('node_modules/quasar/', appDir)
-
   const ctx = {
     prod: process.env.MODE === 'production',
     dev: process.env.MODE === 'development',
@@ -164,10 +158,6 @@ export const QuasarPlugin = ({
         return {
           resolve: {
             alias: [
-              // { find: 'src', replacement: srcDir.pathname },
-              // { find: 'app', replacement: appDir.pathname },
-              // { find: 'boot', replacement: new URL('boot/', srcDir).pathname },
-              // { find: 'assets', replacement: new URL('assets/', srcDir).pathname },
               { find: 'quasar/wrappers', replacement: new URL('quasar-wrappers.ts', cliDir ).pathname },
               { find: 'quasar/vue-plugin', replacement: new URL('src/vue-plugin.js', quasarDir).pathname },
               { find: 'quasar/directives', replacement: new URL('src/directives.js', quasarDir).pathname },
@@ -175,16 +165,6 @@ export const QuasarPlugin = ({
               { find: new RegExp('^quasar$'), replacement: new URL('node_modules/quasar/src/index.all.js', appDir).pathname },
             ]
           },
-          // build: {
-          //   ssr: (ssr === 'server') ? true : false,
-          //   ssrManifest: ssr === 'client',
-          //   rollupOptions: {
-          //     input: (ssr === 'server') ? [
-          //       new URL('ssr/entry-server.ts', cliDir).pathname,
-          //       new URL('ssr/server.ts', cliDir).pathname
-          //     ] : undefined
-          //   }
-          // },
           define: {
             __DEV__: process.env.NODE_ENV !== 'production' || true,
             __QUASAR_VERSION__: `'version'`,
