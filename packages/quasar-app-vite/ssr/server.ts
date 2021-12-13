@@ -2,8 +2,9 @@ import fastify, { FastifyInstance } from 'fastify'
 import { readFileSync } from 'fs'
 import fastifyStatic from 'fastify-static'
 import { resolve } from 'path'
+import sensible from 'fastify-sensible'
+import helmet from 'fastify-helmet'
 import { setup } from 'virtual:fastify-setup'
-
 export const createApp = ({
   setup
 }: {
@@ -12,6 +13,9 @@ export const createApp = ({
   const app = fastify({
     logger: true
   })
+
+  app.register(helmet)
+  app.register(sensible)
 
   setup(app)
 
