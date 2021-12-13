@@ -5,7 +5,6 @@ import { prepareQuasarConf } from './quasar-conf-file.js'
 import { FastifyInstance } from 'fastify'
 import { appDir, cliDir, quasarDir } from './app-urls.js'
 import { QuasarConf } from './quasar-conf-file.js'
-
 import { generateImportMap } from './import-map.js'
 const importMap = generateImportMap(quasarDir.pathname)
 const quasarImports = importMap.autoImport.pascalComponents as string[] // Broken type
@@ -24,13 +23,15 @@ function lowerCamelCase (name: string) {
 export interface Configuration {
   ssr?: 'server' | 'client' | 'ssg' | false,
   quasarConf?: Partial<QuasarConf> | ((ctx: Record<string, any>) => Partial<QuasarConf>),
-  quasarExtensionIndexScripts?: ((api: any) => void)[]
+  quasarExtensionIndexScripts?: ((api: any) => void)[], 
+  quasarSassVariables?: boolean
 }
 
 export const QuasarPlugin = ({
   ssr = false,
   quasarConf,
   quasarExtensionIndexScripts,
+  quasarSassVariables
 }: Configuration = {}): Plugin[] => {
   const extraPlugins: Plugin[] = []
   const ctx = {
@@ -126,6 +127,11 @@ export const QuasarPlugin = ({
     parsedQuasarConf.framework.plugins = [...new Set(parsedQuasarConf.framework.plugins)];
   }
 
+  if (parsedQuasarConf?.vite?.plugins) {
+    extraPlugins.push(...parsedQuasarConf.vite.plugins as Plugin[])
+    delete parsedQuasarConf.vite.plugins
+  }
+
   const components = parsedQuasarConf?.framework.components
   const plugins = parsedQuasarConf?.framework.plugins
   const css = parsedQuasarConf?.css.map((v => {
@@ -136,7 +142,14 @@ export const QuasarPlugin = ({
        })).map((v) => `@import '${v}'`)
   const extras = parsedQuasarConf?.extras
 
+  if (quasarSassVariables) {
+    css.push(`@import 'src/quasar-variables.sass'`)
+  }
   return [
+    {
+      name: 'merge-quasar-conf-vite',
+      config: (config, env) => parsedQuasarConf?.vite
+    },
     Components({
       resolvers: [
         (name: string) => {
@@ -177,8 +190,8 @@ export const QuasarPlugin = ({
             preprocessorOptions: {
               sass: {
                 additionalData: [
-                  `@import 'quasar/src/css/index.sass'`,
-                  ...css
+                  ...css,
+                  `@import 'quasar/src/css/index.sass'`
                 ].join('\n') + '\n'
               }
             },

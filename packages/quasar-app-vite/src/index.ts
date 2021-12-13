@@ -1,5 +1,5 @@
 import vuePlugin from '@vitejs/plugin-vue'
-import { InlineConfig } from 'vite'
+import { InlineConfig, Plugin } from 'vite'
 import { readFileSync, existsSync } from 'fs'
 import { QuasarPlugin } from './vite-plugin-quasar.js'
 import builtinModules from 'builtin-modules'
@@ -16,6 +16,7 @@ export const baseConfig = async ({
    */
    const quasarConf = (await import(new URL('quasar.conf.js', appDir).pathname)).default
    const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
+   const quasarSassVariablesPath = new URL('quasar-variables.sass', srcDir).pathname
 
    let quasarExtensions
    if (existsSync(quasarExtensionsPath)) {
@@ -38,7 +39,12 @@ export const baseConfig = async ({
       quasarExtensionIndexScripts.push((await import(new URL(exports['./index'], new URL(`node_modules/${path}/`, appDir)).pathname)).default)
     }
   }
-  
+
+  let quasarSassVariables: boolean = false
+  if (existsSync(quasarSassVariablesPath)) {
+    quasarSassVariables = true
+  }
+
   return {
     root: appDir.pathname,
     plugins: [
@@ -90,6 +96,7 @@ export const baseConfig = async ({
       QuasarPlugin({
         quasarConf,
         quasarExtensionIndexScripts,
+        quasarSassVariables,
         ssr: ssr,
       })
     ],
