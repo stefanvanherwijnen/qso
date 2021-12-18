@@ -32,7 +32,7 @@
     "vue-router": "^4.0.12"
   },
   "devDependencies": {
-    "@stefanvh/quasar-app-vite": "^0.7.2",
+    "@stefanvh/quasar-app-vite": "^0.7.3",
     "pug": "^3.0.2"
   }
 }
