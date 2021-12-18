@@ -15,9 +15,9 @@
   },
   "devDependencies": {
     "@stefanvh/quasar-app-vite": "^0.7.2",
-    "@vitejs/plugin-vue": "^1.10.0",
+    "@vitejs/plugin-vue": "^2.0.1",
     "typescript": "^4.4.3",
-    "vite": "^2.7.1",
+    "vite": "^2.7.3",
     "vue-tsc": "^0.3.0"
   }
 }

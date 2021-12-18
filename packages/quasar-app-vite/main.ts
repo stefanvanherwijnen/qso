@@ -1,7 +1,7 @@
 import App from 'src/App.vue'
 import createRouter from 'src/router'
-import { createSSRApp, createApp as createVueApp } from 'vue'
-import { Quasar } from 'quasar'
+import { createSSRApp, createApp as createVueApp, h } from 'vue'
+import { Quasar, useQuasar } from 'quasar'
 import quasarComponents from 'virtual:quasar-components'
 import quasarPlugins from 'virtual:quasar-plugins'
 import bootFunctions from 'virtual:quasar-boot'
@@ -17,9 +17,21 @@ interface ssrContext {
 export function createApp (ssrContext?: ssrContext) {
   let app
   if (import.meta.env.SSR) {
-    app = createSSRApp(App)
+    app = createSSRApp({
+      mounted () {
+        const $q = useQuasar()
+        $q.onSSRHydrated !== void 0 && $q.onSSRHydrated()
+      },
+      render: () => h(App)
+    })
   } else {
-    app = createVueApp(App)
+    app = createVueApp({
+      mounted () {
+        const $q = useQuasar()
+        $q.onSSRHydrated !== void 0 && $q.onSSRHydrated()
+      },
+      render: () => h(App)
+    })
   }
   const router = createRouter()
   app.use(router)

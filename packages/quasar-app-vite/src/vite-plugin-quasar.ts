@@ -6,6 +6,7 @@ import { FastifyInstance } from 'fastify'
 import { appDir, cliDir, quasarDir } from './app-urls.js'
 import { QuasarConf } from './quasar-conf-file.js'
 import { generateImportMap } from './import-map.js'
+
 const importMap = generateImportMap(quasarDir.pathname)
 const quasarImports = importMap.autoImport.pascalComponents as string[] // Broken type
 
@@ -184,7 +185,7 @@ export const QuasarPlugin = ({
             __QUASAR_SSR__: !!ssr,
             __QUASAR_SSR_SERVER__: ssr === 'server',
             __QUASAR_SSR_CLIENT__: ssr === 'client',
-            __QUASAR_SSR_PWA__: !!ssr && isPwa
+            __QUASAR_SSR_PWA__: (ssr === 'client') || isPwa
           },
           css: {
             preprocessorOptions: {

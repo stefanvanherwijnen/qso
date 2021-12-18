@@ -3,7 +3,7 @@ import { readFileSync } from 'fs'
 import fastifyStatic from 'fastify-static'
 import { resolve } from 'path'
 import sensible from 'fastify-sensible'
-import helmet from 'fastify-helmet'
+import { injectSsrContext } from '../src/helpers/ssr.js'
 import { setup } from 'virtual:fastify-setup'
 export const createApp = ({
   setup
@@ -14,38 +14,41 @@ export const createApp = ({
     logger: true
   })
 
-  app.register(helmet)
   app.register(sensible)
 
   setup(app)
 
   app.register(fastifyStatic, {
-    root: resolve('./dist/ssr/client'),
-    wildcard: false
+    root: resolve('../client'),
+    wildcard: false,
+    index: false
   })
 
   app.get('*', async (req, res) => {
-      const url = req.raw.url
+    const url = req.raw.url
 
-      let template
-      let render
-      let manifest
-      const ssrContext = {
-        req,
-        res
-      }
-      template = readFileSync(resolve('./dist/ssr/client/index.html')).toString()
-      manifest = readFileSync(resolve('./dist/ssr/client/ssr-manifest.json'))
-      render = (await import(resolve('./dist/ssr/server/entry-server.js'))).render
+    let template
+    let render
+    let manifest
+    const ssrContext = {
+      req,
+      res
+    }
+    template = readFileSync(resolve('../client/index.html')).toString()
+    manifest = readFileSync(resolve('../client/ssr-manifest.json'))
+    render = (await import(resolve('./entry-server.js'))).render
 
-      const [appHtml, preloadLinks] = await render(url, manifest, ssrContext)
-      const html = template
-        .replace(`<!--preload-links-->`, preloadLinks)
-        .replace(`<!--app-html-->`, appHtml)
+    const [appHtml, preloadLinks] = await render(url, manifest, ssrContext)
 
-      res.code(200)
-      res.type('text/html')
-      res.send(html)      
+    const html = template
+      .replace(`<!--preload-links-->`, preloadLinks)
+      .replace(`<!--app-html-->`, appHtml)
+
+    injectSsrContext(html, ssrContext)
+
+    res.code(200)
+    res.type('text/html')
+    res.send(html)
   })
 
   return app
