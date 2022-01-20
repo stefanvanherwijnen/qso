@@ -7,7 +7,7 @@ import quasarPlugins from 'virtual:quasar-plugins'
 import bootFunctions from 'virtual:quasar-boot'
 import 'virtual:quasar-extras'
 import * as directives from 'quasar/directives'
-
+import routes from 'src/router/routes'
 interface ssrContext {
   ssr: boolean
   provide?: Record<string, unknown>
@@ -52,5 +52,5 @@ export function createApp (ssrContext?: ssrContext) {
     fn({ app })
   }
 
-  return { app, router }
+  return { app, router, routes }
 }

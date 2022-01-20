@@ -8,20 +8,35 @@ import { appDir, cliDir, srcDir } from './app-urls.js'
 
 export const baseConfig = async ({
   ssr,
+  paths
 }: {
-  ssr?: 'client' | 'server' | 'ssg'
+  ssr?: 'client' | 'server' | 'ssg',
+  paths?: {
+    appDir: URL,
+    srcDir: URL
+  }
 }): Promise<InlineConfig> => {
+  let appDir: URL
+  let cliDir: URL
+  let srcDir: URL
+  if (paths) {
+    appDir = paths.appDir
+    srcDir = paths.srcDir;
+    ({ cliDir } = await import('./app-urls.js'))
+  } else {
+    ({ appDir, cliDir, srcDir } = await import('./app-urls.js'))
+  }
   /**
    * TODO:Perform some manual check if command is run inside a Quasar Project
    */
-   const quasarConf = (await import(new URL('quasar.conf.js', appDir).pathname)).default
-   const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
-   const quasarSassVariablesPath = new URL('quasar-variables.sass', srcDir).pathname
+  const quasarConf = (await import(new URL('quasar.conf.js', appDir).pathname)).default
+  const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
+  const quasarSassVariablesPath = new URL('quasar-variables.sass', srcDir).pathname
 
-   let quasarExtensions
-   if (existsSync(quasarExtensionsPath)) {
+  let quasarExtensions
+  if (existsSync(quasarExtensionsPath)) {
     quasarExtensions = JSON.parse(readFileSync(quasarExtensionsPath, { encoding: 'utf-8' }))
-   }
+  }
 
   const ssrTransformCustomDir = () => {
     return {
@@ -54,18 +69,18 @@ export const baseConfig = async ({
         transformIndexHtml: {
           enforce: 'pre',
           transform: (html) => {
-              let entry: string
-              switch (ssr) {
-                case 'server' || 'client':
-                  entry = new URL('ssr/entry-client.ts', cliDir).pathname
-                  break;
-                default:
-                  entry = new URL('csr/entry.ts', cliDir).pathname
-              const entryScript = `<script type="module" src="${entry}"></script>`
-              html = html.replace(
-                '<!--entry-script-->',
-                entryScript
-              )
+            let entry: string
+            switch (ssr) {
+              case 'server' || 'client':
+                entry = new URL('ssr/entry-client.ts', cliDir).pathname
+                break;
+              default:
+                entry = new URL('csr/entry.ts', cliDir).pathname
+                const entryScript = `<script type="module" src="${entry}"></script>`
+                html = html.replace(
+                  '<!--entry-script-->',
+                  entryScript
+                )
             }
             return html
           }
@@ -103,7 +118,7 @@ export const baseConfig = async ({
     optimizeDeps: {
       exclude: ['vue']
     },
-    resolve: {  
+    resolve: {
       // Dedupe uses require which breaks ESM SSR builds
       // dedupe: [
       //   'vue',
@@ -120,7 +135,7 @@ export const baseConfig = async ({
     },
     build: {
       ssr: (ssr === 'server') ? true : false,
-      ssrManifest: ssr === 'client',
+      ssrManifest: (ssr === 'client' || ssr === 'ssg'),
       rollupOptions: {
         input: (ssr === 'server') ? [
           new URL('ssr/entry-server.ts', cliDir).pathname,
