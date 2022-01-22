@@ -14,9 +14,9 @@ interface ssrContext {
   [key: string]: unknown
 }
 
-export function createApp (ssrContext?: ssrContext) {
+export async function createApp (ssr?: 'client' | 'server', ssrContext?: ssrContext) {
   let app
-  if (import.meta.env.SSR) {
+  if (ssr) {
     app = createSSRApp({
       mounted () {
         const $q = useQuasar()

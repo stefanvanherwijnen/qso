@@ -47,7 +47,6 @@ const prerender = async ({
   let { render, getRoutes } = (await import(entryServerPath))
   const routes = await getRoutes()
   const paths = routesToPaths(routes).filter(i => !i.includes(':') && !i.includes('*'))
-  console.log(paths)
   for (let url of paths) {
     const filename = (url.endsWith('/') ? 'index' : url.replace(/^\//g, '')) + '.html'
     console.log(`Generating ${filename}`)

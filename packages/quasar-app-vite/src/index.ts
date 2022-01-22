@@ -61,7 +61,8 @@ export const baseConfig = async ({
   }
 
   return {
-    root: appDir.pathname,
+    root: cliDir.pathname,
+    publicDir: new URL('public/', appDir).pathname,
     plugins: [
       {
         name: 'html-transform',
@@ -71,17 +72,18 @@ export const baseConfig = async ({
           transform: (html) => {
             let entry: string
             switch (ssr) {
-              case 'server' || 'client':
+              case 'ssg':
+              case 'client':
                 entry = new URL('ssr/entry-client.ts', cliDir).pathname
                 break;
               default:
                 entry = new URL('csr/entry.ts', cliDir).pathname
-                const entryScript = `<script type="module" src="${entry}"></script>`
-                html = html.replace(
-                  '<!--entry-script-->',
-                  entryScript
-                )
             }
+            const entryScript = `<script type="module" src="${entry}"></script>`
+            html = html.replace(
+              '<!--entry-script-->',
+              entryScript
+            )
             return html
           }
         }
