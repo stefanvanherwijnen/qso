@@ -6,6 +6,7 @@ import { FastifyInstance } from 'fastify'
 import { appDir, cliDir, quasarDir } from './app-urls.js'
 import { QuasarConf } from './quasar-conf-file.js'
 import { generateImportMap } from './import-map.js'
+import { IndexAPI } from './app-extension/IndexAPI.js'
 
 const importMap = generateImportMap(quasarDir.pathname)
 const quasarImports = importMap.autoImport.pascalComponents as string[] // Broken type
@@ -56,30 +57,30 @@ export const QuasarPlugin = ({
   let bootFilePaths: Record<string, any> = {}
   let fastifySetup = (fastify: FastifyInstance) => {}
 
-  const indexApi = {
-    ctx,
-    getPersistentConf () {},
-    setPersistentConf (cfg: Record<string, any>) {},
-    mergePersistentConf (cfg = {}) {},
-    async compatibleWith (packageName: string, semverCondition: string) {},
-    async hasPackage (packageName: string, semverCondition: string) {},
-    hasExtension (extId: string) {},
-    async getPackageVersion (packageName: string) {},
-    extendQuasarConf (fn: (cfg: Record<string, any>, ctx: Record<string, any>) => void) {
-      fn(parsedQuasarConf as Record<string, any>, ctx)
-    },
-    registerCommand (commandName: string, fn: ({ args, params }: { args: string[], params: Record<string, any> }) => Promise<any>) {},
-    registerDescribeApi (name: string, relativePath: string) {},
-    beforeDev (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
-    afterDev (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
-    beforeBuild (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
-    afterBuild (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
+  // const indexApi = {
+  //   ctx,
+  //   getPersistentConf () {},
+  //   setPersistentConf (cfg: Record<string, any>) {},
+  //   mergePersistentConf (cfg = {}) {},
+  //   async compatibleWith (packageName: string, semverCondition: string) {},
+  //   async hasPackage (packageName: string, semverCondition: string) {},
+  //   hasExtension (extId: string) {},
+  //   async getPackageVersion (packageName: string) {},
+  //   extendQuasarConf (fn: (cfg: Record<string, any>, ctx: Record<string, any>) => void) {
+  //     fn(parsedQuasarConf as Record<string, any>, ctx)
+  //   },
+  //   registerCommand (commandName: string, fn: ({ args, params }: { args: string[], params: Record<string, any> }) => Promise<any>) {},
+  //   registerDescribeApi (name: string, relativePath: string) {},
+  //   beforeDev (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
+  //   afterDev (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
+  //   beforeBuild (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
+  //   afterBuild (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
   
-  }
+  // }
 
   if (quasarExtensionIndexScripts) {
     for (let index of quasarExtensionIndexScripts) {
-      index(indexApi)
+      index(IndexAPI(ctx, parsedQuasarConf))
     } 
   }
 
@@ -109,7 +110,7 @@ export const QuasarPlugin = ({
           const split = entry.substring(1).split('/')
           const name = split[0].replace(/[|&;$%@"<>()+,]/g, "");
           acc[name] = {
-            path: `${entry.substring(1)}`
+            path: new URL(`node_modules/${entry.substring(1)}`, appDir).pathname
           }
         } else {
           const name = entry.split('.')[0]

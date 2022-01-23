@@ -10,12 +10,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "vue": "^3.2.23",
-    "vue-router": "^4.0.12",
     "@quasar/extras": "^1.12.1",
-    "quasar": "^2.3.3"
+    "quasar": "^2.3.3",
+    "vue": "^3.2.23",
+    "vue-router": "^4.0.12"
   },
   "devDependencies": {
-    "@stefanvh/quasar-app-vite": "^0.7.3"
+    "@stefanvh/quasar-app-vite": "^0.7.3",
+    "fastify": "^3.27.0",
+    "fastify-sensible": "^3.1.2",
+    "fastify-static": "^4.5.0"
   }
 }

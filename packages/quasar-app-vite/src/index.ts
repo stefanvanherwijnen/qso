@@ -29,6 +29,8 @@ export const baseConfig = async ({
   /**
    * TODO:Perform some manual check if command is run inside a Quasar Project
    */
+  const packageJson = JSON.parse(readFileSync(new URL('package.json', appDir).pathname, { encoding: 'utf-8' }))
+
   const quasarConf = (await import(new URL('quasar.conf.js', appDir).pathname)).default
   const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
   const quasarSassVariablesPath = new URL('quasar-variables.sass', srcDir).pathname
@@ -49,9 +51,20 @@ export const baseConfig = async ({
   if (quasarExtensions) {
     for (let ext of Object.keys(quasarExtensions)) {
       const path = getAppExtensionPath(ext)
-      const packageJson = JSON.parse(readFileSync(new URL(`node_modules/${path}/package.json`, appDir).pathname, 'utf-8'))
-      const exports = packageJson.exports
-      quasarExtensionIndexScripts.push((await import(new URL(exports['./index'], new URL(`node_modules/${path}/`, appDir)).pathname)).default)
+      const { main, exports } = JSON.parse(readFileSync(new URL(`node_modules/${path}/package.json`, appDir).pathname, 'utf-8'))
+      
+      let IndexAPI
+      try {
+        ({ IndexAPI } = (await import(new URL(exports['./api'], new URL(`node_modules/${path}/`, appDir)).pathname)))
+      } catch (e) {
+        console.log(e)
+        try {
+          ({ IndexAPI } = (await import(new URL(main, new URL(`node_modules/${path}/`, appDir)).pathname)))
+        } catch (e) {
+          IndexAPI = (await import(new URL('src/index.js', new URL(`node_modules/${path}/`, appDir)).pathname)).default
+        }
+      }
+      quasarExtensionIndexScripts.push(IndexAPI)
     }
   }
 
@@ -83,6 +96,9 @@ export const baseConfig = async ({
             html = html.replace(
               '<!--entry-script-->',
               entryScript
+            ).replace(
+              '<!--product-name-->',
+              packageJson.productName
             )
             return html
           }

@@ -57,25 +57,13 @@ export const render = ({
 
   writeFileSync(outputPath, compiled, 'utf-8')
 }
-
-const templateVariables = {
-  packageJson: {
-    name: 'Test',
-    author: 'John',
-    description: 'Description',
-    license: 'License',
-    dependencies: []
-  },
-  app: {
-    title: 'Test'
-  }
-}
-
 export const renderTemplate = ({
   template,
+  templateVariables,
   outputDir
 }: {
   template: string,
+  templateVariables: Record<string, any>,
   outputDir: URL
 }) => {
   if (outputDir.pathname[outputDir.pathname.length - 1] !== '/') {
@@ -95,11 +83,6 @@ export const renderTemplate = ({
   render({
     inputPath: new URL('./quasar.conf.js', templatesDir),
     outputPath: new URL(`./quasar.conf.js`, outputDir),
-    templateVariables
-  })
-  render({
-    inputPath: new URL('./index.html', templatesDir),
-    outputPath: new URL(`./index.html`, outputDir),
     templateVariables
   })
 
