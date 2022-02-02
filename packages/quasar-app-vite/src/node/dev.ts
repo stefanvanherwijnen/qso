@@ -50,8 +50,8 @@ export async function createServer ({
     fs: {
       allow: [
         searchForWorkspaceRoot(process.cwd()),
-        cliDir.pathname,
-        appDir.pathname,
+        searchForWorkspaceRoot(cliDir.pathname)
+        // appDir.pathname,
       ]
     },
     watch: {
@@ -93,8 +93,15 @@ export async function createServer ({
         // template = await vite.transformIndexHtml(url, template)
         const entryUrl = new URL('ssr/entry-server.ts', cliDir).pathname
         render = (await vite.ssrLoadModule(entryUrl)).render
+        let manifest
+        // TODO: https://github.com/vitejs/vite/issues/2282
+        try {
+          manifest = {}
+        } catch (e) {
+          manifest = {}
+        }
 
-        const [appHtml, preloadLinks] = await render(url, {}, ssrContext)
+        const [appHtml, preloadLinks] = await render(url, manifest, ssrContext)
         const html = template
           .replace(`<!--preload-links-->`, preloadLinks)
           .replace(`<!--app-html-->`, appHtml)

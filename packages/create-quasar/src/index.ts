@@ -22,11 +22,16 @@ export const renderAll = ({
 
   for (let file of files) {
     const fileContent = readFileSync(new URL(`./${file}`, inputPath), 'utf-8')
+    let output
+    if (file.endsWith('.hbs')) {
+      const template = Handlebars.compile(fileContent)
+      output = template(templateVariables)
+    } else {
+      output = fileContent
+    }
     const fileOutputPath = new URL(file.replace('.hbs', ''), outputPath)
-    const template = Handlebars.compile(fileContent)
-    const compiled = template(templateVariables)
 
-    writeFileSync(fileOutputPath, compiled, 'utf-8')
+    writeFileSync(fileOutputPath, output, 'utf-8')
   }
 
   for (let directory of directories) {
@@ -57,25 +62,13 @@ export const render = ({
 
   writeFileSync(outputPath, compiled, 'utf-8')
 }
-
-const templateVariables = {
-  packageJson: {
-    name: 'Test',
-    author: 'John',
-    description: 'Description',
-    license: 'License',
-    dependencies: []
-  },
-  app: {
-    title: 'Test'
-  }
-}
-
 export const renderTemplate = ({
   template,
+  templateVariables,
   outputDir
 }: {
   template: string,
+  templateVariables: Record<string, any>,
   outputDir: URL
 }) => {
   if (outputDir.pathname[outputDir.pathname.length - 1] !== '/') {
@@ -88,18 +81,13 @@ export const renderTemplate = ({
    * General Quasar project files
    */
   render({
-    inputPath: new URL('./package.json', templatesDir),
+    inputPath: new URL('./package.json.hbs', templatesDir),
     outputPath: new URL(`./package.json`, outputDir),
     templateVariables
   })
   render({
     inputPath: new URL('./quasar.conf.js', templatesDir),
     outputPath: new URL(`./quasar.conf.js`, outputDir),
-    templateVariables
-  })
-  render({
-    inputPath: new URL('./index.html', templatesDir),
-    outputPath: new URL(`./index.html`, outputDir),
     templateVariables
   })
 

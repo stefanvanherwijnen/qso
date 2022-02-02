@@ -8,20 +8,39 @@ import { appDir, cliDir, srcDir } from './app-urls.js'
 
 export const baseConfig = async ({
   ssr,
+  paths
 }: {
-  ssr?: 'client' | 'server' | 'ssg'
+  ssr?: 'client' | 'server' | 'ssg',
+  paths?: {
+    appDir: URL,
+    srcDir: URL
+  }
 }): Promise<InlineConfig> => {
+  let appDir: URL
+  let cliDir: URL
+  let srcDir: URL
+  if (paths) {
+    appDir = paths.appDir
+    srcDir = paths.srcDir;
+    ({ cliDir } = await import('./app-urls.js'))
+  } else {
+    ({ appDir, cliDir, srcDir } = await import('./app-urls.js'))
+  }
   /**
    * TODO:Perform some manual check if command is run inside a Quasar Project
    */
-   const quasarConf = (await import(new URL('quasar.conf.js', appDir).pathname)).default
-   const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
-   const quasarSassVariablesPath = new URL('quasar-variables.sass', srcDir).pathname
+  const packageJson = JSON.parse(readFileSync(new URL('package.json', appDir).pathname, { encoding: 'utf-8' }))
 
-   let quasarExtensions
-   if (existsSync(quasarExtensionsPath)) {
-    quasarExtensions = JSON.parse(readFileSync(quasarExtensionsPath, { encoding: 'utf-8' }))
-   }
+  const quasarConf = (await import(new URL('quasar.conf.js', appDir).pathname)).default
+  // const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
+  const quasarSassVariablesPath = new URL('quasar-variables.sass', srcDir).pathname
+  const quasarPkgJsonPath = new URL('node_modules/quasar/package.json', appDir).pathname
+
+  // let quasarExtensions
+  // if (existsSync(quasarExtensionsPath)) {
+  //   quasarExtensions = JSON.parse(readFileSync(quasarExtensionsPath, { encoding: 'utf-8' }))
+  // }
+  const { version } = JSON.parse(readFileSync(quasarPkgJsonPath, { encoding: 'utf-8' }))
 
   const ssrTransformCustomDir = () => {
     return {
@@ -30,15 +49,26 @@ export const baseConfig = async ({
     }
   }
 
-  let quasarExtensionIndexScripts = []
-  if (quasarExtensions) {
-    for (let ext of Object.keys(quasarExtensions)) {
-      const path = getAppExtensionPath(ext)
-      const packageJson = JSON.parse(readFileSync(new URL(`node_modules/${path}/package.json`, appDir).pathname, 'utf-8'))
-      const exports = packageJson.exports
-      quasarExtensionIndexScripts.push((await import(new URL(exports['./index'], new URL(`node_modules/${path}/`, appDir)).pathname)).default)
-    }
-  }
+  // let quasarExtensionIndexScripts = []
+  // if (quasarExtensions) {
+  //   for (let ext of Object.keys(quasarExtensions)) {
+  //     const path = getAppExtensionPath(ext)
+  //     const { main, exports } = JSON.parse(readFileSync(new URL(`node_modules/${path}/package.json`, appDir).pathname, 'utf-8'))
+      
+  //     let IndexAPI
+  //     try {
+  //       ({ IndexAPI } = (await import(new URL(exports['./api'], new URL(`node_modules/${path}/`, appDir)).pathname)))
+  //     } catch (e) {
+  //       console.log(e)
+  //       try {
+  //         ({ IndexAPI } = (await import(new URL(main, new URL(`node_modules/${path}/`, appDir)).pathname)))
+  //       } catch (e) {
+  //         IndexAPI = (await import(new URL('src/index.js', new URL(`node_modules/${path}/`, appDir)).pathname)).default
+  //       }
+  //     }
+  //     quasarExtensionIndexScripts.push(IndexAPI)
+  //   }
+  // }
 
   let quasarSassVariables: boolean = false
   if (existsSync(quasarSassVariablesPath)) {
@@ -46,7 +76,8 @@ export const baseConfig = async ({
   }
 
   return {
-    root: appDir.pathname,
+    root: cliDir.pathname,
+    publicDir: new URL('public/', appDir).pathname,
     plugins: [
       {
         name: 'html-transform',
@@ -54,19 +85,23 @@ export const baseConfig = async ({
         transformIndexHtml: {
           enforce: 'pre',
           transform: (html) => {
-              let entry: string
-              switch (ssr) {
-                case 'server' || 'client':
-                  entry = new URL('ssr/entry-client.ts', cliDir).pathname
-                  break;
-                default:
-                  entry = new URL('csr/entry.ts', cliDir).pathname
-              const entryScript = `<script type="module" src="${entry}"></script>`
-              html = html.replace(
-                '<!--entry-script-->',
-                entryScript
-              )
+            let entry: string
+            switch (ssr) {
+              case 'ssg':
+              case 'client':
+                entry = new URL('ssr/entry-client.ts', cliDir).pathname
+                break;
+              default:
+                entry = new URL('csr/entry.ts', cliDir).pathname
             }
+            const entryScript = `<script type="module" src="${entry}"></script>`
+            html = html.replace(
+              '<!--entry-script-->',
+              entryScript
+            ).replace(
+              '<!--product-name-->',
+              packageJson.productName
+            )
             return html
           }
         }
@@ -93,9 +128,10 @@ export const baseConfig = async ({
           }
         }
       ),
-      QuasarPlugin({
+      await QuasarPlugin({
+        version,
         quasarConf,
-        quasarExtensionIndexScripts,
+        // quasarExtensionIndexScripts,
         quasarSassVariables,
         ssr: ssr,
       })
@@ -103,7 +139,7 @@ export const baseConfig = async ({
     optimizeDeps: {
       exclude: ['vue']
     },
-    resolve: {  
+    resolve: {
       // Dedupe uses require which breaks ESM SSR builds
       // dedupe: [
       //   'vue',
@@ -120,7 +156,7 @@ export const baseConfig = async ({
     },
     build: {
       ssr: (ssr === 'server') ? true : false,
-      ssrManifest: ssr === 'client',
+      ssrManifest: (ssr === 'client' || ssr === 'ssg'),
       rollupOptions: {
         input: (ssr === 'server') ? [
           new URL('ssr/entry-server.ts', cliDir).pathname,

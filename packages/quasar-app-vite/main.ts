@@ -1,37 +1,31 @@
 import App from 'src/App.vue'
 import createRouter from 'src/router'
-import { createSSRApp, createApp as createVueApp, h } from 'vue'
+import { createSSRApp, createApp as createVueApp, h, onMounted, getCurrentInstance } from 'vue'
 import { Quasar, useQuasar } from 'quasar'
 import quasarComponents from 'virtual:quasar-components'
 import quasarPlugins from 'virtual:quasar-plugins'
 import bootFunctions from 'virtual:quasar-boot'
 import 'virtual:quasar-extras'
 import * as directives from 'quasar/directives'
-
+import routes from 'src/router/routes'
 interface ssrContext {
   ssr: boolean
   provide?: Record<string, unknown>
   [key: string]: unknown
 }
 
-export function createApp (ssrContext?: ssrContext) {
+export async function createApp (ssr?: 'client' | 'server', ssrContext?: ssrContext) {
   let app
-  if (import.meta.env.SSR) {
-    app = createSSRApp({
-      mounted () {
-        const $q = useQuasar()
-        $q.onSSRHydrated !== void 0 && $q.onSSRHydrated()
-      },
-      render: () => h(App)
-    })
+  if (ssr === 'server') {
+    app = createSSRApp(App)
+  } else if (ssr === 'client') {
+    app = createSSRApp(App)
+    app.mounted = () => {
+      const { proxy: { $q } } = getCurrentInstance()
+      $q.onSSRHydrated !== void 0 && $q.onSSRHydrated()
+    }
   } else {
-    app = createVueApp({
-      mounted () {
-        const $q = useQuasar()
-        $q.onSSRHydrated !== void 0 && $q.onSSRHydrated()
-      },
-      render: () => h(App)
-    })
+    app = createVueApp(App)
   }
   const router = createRouter()
   app.use(router)
@@ -52,5 +46,5 @@ export function createApp (ssrContext?: ssrContext) {
     fn({ app })
   }
 
-  return { app, router }
+  return { app, router, routes }
 }

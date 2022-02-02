@@ -1,22 +1,22 @@
 {
-  "name": "{{ packageJson.name }}",
+  "name": "{{ name }}",
+  "productName": "{{ productName }}",
   "version": "1.0.0",
   "type": "module",
-  "description": "{{ packageJson.description }}",
+  "description": "{{ description }}",
   "scripts": {
     "dev": "quasar-vite dev",
     "build": "quasar-vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "{{ packageJson.author }}",
-  "license": "{{ packageJson.license }}",
+  "author": "{{ author }}",
   "dependencies": {
     "vue": "^3.2.23",
     "vue-router": "^4.0.12",
-    "@quasar/extras": "^1.12.1",
-    "quasar": "^2.3.3"
+    "@quasar/extras": "^1.12.4",
+    "quasar": "^2.4.12"
   },
   "devDependencies": {
-    "@stefanvh/quasar-app-vite": "^0.6.3"
+    "@stefanvh/quasar-app-vite": "^0.7.3"
   }
 }

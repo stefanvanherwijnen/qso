@@ -11,10 +11,16 @@ export default function (ctx) {
       ]
     },
     vite: {
-
+      // Vite configuration
     },
     fastify: {
-      
+      // Fastify configuration for SSR
+    },
+    sassVariables: {
+      // Or use src/quasar-variables.sass
+    },
+    appExtensions: {
+      // Or use quasar-extensions.json
     }
   }
 }
