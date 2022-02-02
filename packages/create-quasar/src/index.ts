@@ -91,7 +91,7 @@ export const renderTemplate = ({
   //   templateVariables
   // })
   render({
-    inputPath: new URL('./.gitignore', templatesDir),
+    inputPath: new URL('./_gitignore', templatesDir),
     outputPath: new URL(`./.gitignore`, outputDir),
     templateVariables
   })
