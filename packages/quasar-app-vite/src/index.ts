@@ -32,13 +32,15 @@ export const baseConfig = async ({
   const packageJson = JSON.parse(readFileSync(new URL('package.json', appDir).pathname, { encoding: 'utf-8' }))
 
   const quasarConf = (await import(new URL('quasar.conf.js', appDir).pathname)).default
-  const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
+  // const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
   const quasarSassVariablesPath = new URL('quasar-variables.sass', srcDir).pathname
+  const quasarPkgJsonPath = new URL('node_modules/quasar/package.json', appDir).pathname
 
-  let quasarExtensions
-  if (existsSync(quasarExtensionsPath)) {
-    quasarExtensions = JSON.parse(readFileSync(quasarExtensionsPath, { encoding: 'utf-8' }))
-  }
+  // let quasarExtensions
+  // if (existsSync(quasarExtensionsPath)) {
+  //   quasarExtensions = JSON.parse(readFileSync(quasarExtensionsPath, { encoding: 'utf-8' }))
+  // }
+  const { version } = JSON.parse(readFileSync(quasarPkgJsonPath, { encoding: 'utf-8' }))
 
   const ssrTransformCustomDir = () => {
     return {
@@ -47,26 +49,26 @@ export const baseConfig = async ({
     }
   }
 
-  let quasarExtensionIndexScripts = []
-  if (quasarExtensions) {
-    for (let ext of Object.keys(quasarExtensions)) {
-      const path = getAppExtensionPath(ext)
-      const { main, exports } = JSON.parse(readFileSync(new URL(`node_modules/${path}/package.json`, appDir).pathname, 'utf-8'))
+  // let quasarExtensionIndexScripts = []
+  // if (quasarExtensions) {
+  //   for (let ext of Object.keys(quasarExtensions)) {
+  //     const path = getAppExtensionPath(ext)
+  //     const { main, exports } = JSON.parse(readFileSync(new URL(`node_modules/${path}/package.json`, appDir).pathname, 'utf-8'))
       
-      let IndexAPI
-      try {
-        ({ IndexAPI } = (await import(new URL(exports['./api'], new URL(`node_modules/${path}/`, appDir)).pathname)))
-      } catch (e) {
-        console.log(e)
-        try {
-          ({ IndexAPI } = (await import(new URL(main, new URL(`node_modules/${path}/`, appDir)).pathname)))
-        } catch (e) {
-          IndexAPI = (await import(new URL('src/index.js', new URL(`node_modules/${path}/`, appDir)).pathname)).default
-        }
-      }
-      quasarExtensionIndexScripts.push(IndexAPI)
-    }
-  }
+  //     let IndexAPI
+  //     try {
+  //       ({ IndexAPI } = (await import(new URL(exports['./api'], new URL(`node_modules/${path}/`, appDir)).pathname)))
+  //     } catch (e) {
+  //       console.log(e)
+  //       try {
+  //         ({ IndexAPI } = (await import(new URL(main, new URL(`node_modules/${path}/`, appDir)).pathname)))
+  //       } catch (e) {
+  //         IndexAPI = (await import(new URL('src/index.js', new URL(`node_modules/${path}/`, appDir)).pathname)).default
+  //       }
+  //     }
+  //     quasarExtensionIndexScripts.push(IndexAPI)
+  //   }
+  // }
 
   let quasarSassVariables: boolean = false
   if (existsSync(quasarSassVariablesPath)) {
@@ -126,9 +128,10 @@ export const baseConfig = async ({
           }
         }
       ),
-      QuasarPlugin({
+      await QuasarPlugin({
+        version,
         quasarConf,
-        quasarExtensionIndexScripts,
+        // quasarExtensionIndexScripts,
         quasarSassVariables,
         ssr: ssr,
       })

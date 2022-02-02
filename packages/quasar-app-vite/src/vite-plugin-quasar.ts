@@ -1,3 +1,4 @@
+import { readFileSync, existsSync } from 'fs';
 import type { Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import Components from 'unplugin-vue-components/vite'
@@ -7,6 +8,7 @@ import { appDir, cliDir, quasarDir } from './app-urls.js'
 import { QuasarConf } from './quasar-conf-file.js'
 import { generateImportMap } from './import-map.js'
 import { IndexAPI } from './app-extension/IndexAPI.js'
+import { getAppExtensionPath } from './app-extension/api.js'
 
 const importMap = generateImportMap(quasarDir.pathname)
 const quasarImports = importMap.autoImport.pascalComponents as string[] // Broken type
@@ -23,18 +25,20 @@ function lowerCamelCase (name: string) {
 }
 
 export interface Configuration {
+  version?: string,
   ssr?: 'server' | 'client' | 'ssg' | false,
   quasarConf?: Partial<QuasarConf> | ((ctx: Record<string, any>) => Partial<QuasarConf>),
-  quasarExtensionIndexScripts?: ((api: any) => void)[], 
+  // quasarExtensionIndexScripts?: ((api: any) => void)[], 
   quasarSassVariables?: boolean
 }
 
-export const QuasarPlugin = ({
+export const QuasarPlugin = async ({
+  version,
   ssr = false,
   quasarConf,
-  quasarExtensionIndexScripts,
+  // quasarExtensionIndexScripts,
   quasarSassVariables
-}: Configuration = {}): Plugin[] => {
+}: Configuration = {}): Promise<Plugin[]> => {
   const extraPlugins: Plugin[] = []
   const ctx = {
     prod: process.env.MODE === 'production',
@@ -57,6 +61,32 @@ export const QuasarPlugin = ({
   let bootFilePaths: Record<string, any> = {}
   let fastifySetup = (fastify: FastifyInstance) => {}
 
+  let quasarExtensionIndexScripts = []
+  if (!parsedQuasarConf.appExtensions) {
+    const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
+    if (existsSync(quasarExtensionsPath)) {
+      parsedQuasarConf.appExtensions = JSON.parse(readFileSync(quasarExtensionsPath, { encoding: 'utf-8' }))
+    }
+  }
+  if (parsedQuasarConf.appExtensions) {
+    for (let ext of Object.keys(parsedQuasarConf.appExtensions)) {
+      const path = getAppExtensionPath(ext)
+      const { main, exports } = JSON.parse(readFileSync(new URL(`node_modules/${path}/package.json`, appDir).pathname, 'utf-8'))
+      let IndexAPI
+      try {
+        ({ IndexAPI } = (await import(new URL(exports['./api'], new URL(`node_modules/${path}/`, appDir)).pathname)))
+      } catch (e) {
+        try {
+          IndexAPI = (await import(new URL(main, new URL(`node_modules/${path}/`, appDir)).pathname))
+          if ('IndexAPI' in IndexAPI) ({ IndexAPI } = IndexAPI)
+          else IndexAPI = IndexAPI.default
+        } catch (e) {
+          IndexAPI = (await import(new URL('src/index.js', new URL(`node_modules/${path}/`, appDir)).pathname)).default
+        }
+      }
+      quasarExtensionIndexScripts.push(IndexAPI)
+    }
+  }
   // const indexApi = {
   //   ctx,
   //   getPersistentConf () {},
@@ -146,8 +176,26 @@ export const QuasarPlugin = ({
 
   if (quasarSassVariables) {
     css.push(`@import 'src/quasar-variables.sass'`)
+  } else if (parsedQuasarConf.sassVariables) {
+    for (let variable in parsedQuasarConf.sassVariables) {
+      css.push(`${variable}: ${parsedQuasarConf.sassVariables[variable]}`)
+    }
   }
+
   return [
+    {
+      name: 'legacy-support',
+      enforce: 'pre',
+      transform (code, id) {
+        /**
+         * ESM does not resolve an import to .default when there are multiple exports. The following is required to make the VuePlugin import of QCalendar work.
+         */
+        if (code.includes('app.use(VuePlugin)')) {
+          code = code.replace(/app\.use\(VuePlugin\)/g, `app.use(VuePlugin.install ? VuePlugin : VuePlugin.default)`)
+        }
+        return code
+      }
+    },
     {
       name: 'merge-quasar-conf-vite',
       config: (config, env) => parsedQuasarConf?.vite
@@ -182,11 +230,11 @@ export const QuasarPlugin = ({
           },
           define: {
             __DEV__: process.env.NODE_ENV !== 'production' || true,
-            __QUASAR_VERSION__: `'version'`,
+            __QUASAR_VERSION__: `'${version}'`,
             __QUASAR_SSR__: !!ssr,
             __QUASAR_SSR_SERVER__: ssr === 'server',
             __QUASAR_SSR_CLIENT__: ssr === 'client',
-            __QUASAR_SSR_PWA__: (ssr === 'client') || isPwa
+            __QUASAR_SSR_PWA__: (ssr === 'client') && isPwa
           },
           css: {
             preprocessorOptions: {

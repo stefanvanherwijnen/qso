@@ -22,7 +22,9 @@ export interface QuasarConf {
   fastify?: {
     /** setup() is called directly after instantiating fastify. Use it to register your own plugins, routes etc. */
     setup: (fastify: FastifyInstance) => any
-  }
+  },
+  sassVariables: Record<string, string>,
+  appExtensions: Record<string, any>
 }
 
 export const prepareQuasarConf = (conf?: Partial<QuasarConf>) => {

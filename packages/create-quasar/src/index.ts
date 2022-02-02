@@ -22,11 +22,16 @@ export const renderAll = ({
 
   for (let file of files) {
     const fileContent = readFileSync(new URL(`./${file}`, inputPath), 'utf-8')
+    let output
+    if (file.endsWith('.hbs')) {
+      const template = Handlebars.compile(fileContent)
+      output = template(templateVariables)
+    } else {
+      output = fileContent
+    }
     const fileOutputPath = new URL(file.replace('.hbs', ''), outputPath)
-    const template = Handlebars.compile(fileContent)
-    const compiled = template(templateVariables)
 
-    writeFileSync(fileOutputPath, compiled, 'utf-8')
+    writeFileSync(fileOutputPath, output, 'utf-8')
   }
 
   for (let directory of directories) {
@@ -76,7 +81,7 @@ export const renderTemplate = ({
    * General Quasar project files
    */
   render({
-    inputPath: new URL('./package.json', templatesDir),
+    inputPath: new URL('./package.json.hbs', templatesDir),
     outputPath: new URL(`./package.json`, outputDir),
     templateVariables
   })

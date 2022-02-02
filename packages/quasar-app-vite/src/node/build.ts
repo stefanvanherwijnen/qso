@@ -56,11 +56,12 @@ const prerender = async ({
     }
     const [appHtml, preloadLinks] = await render(url, manifest, ssrContext)
 
-    const html = template
+    let html = template
       .replace(`<!--preload-links-->`, preloadLinks)
       .replace(`<!--app-html-->`, appHtml)
 
-    injectSsrContext(html, ssrContext)
+    html = injectSsrContext(html, ssrContext)
+
     promises.push(fs.writeFile(outDir + filename, html, 'utf-8'))
   }
   return Promise.all(promises)

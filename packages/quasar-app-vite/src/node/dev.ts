@@ -50,8 +50,8 @@ export async function createServer ({
     fs: {
       allow: [
         searchForWorkspaceRoot(process.cwd()),
-        cliDir.pathname,
-        appDir.pathname,
+        searchForWorkspaceRoot(cliDir.pathname)
+        // appDir.pathname,
       ]
     },
     watch: {

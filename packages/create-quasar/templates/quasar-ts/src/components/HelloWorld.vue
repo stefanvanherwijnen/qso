@@ -1,10 +1,18 @@
 <template>
-  {{ count }}
-  Hello World
+  <q-card>
+      <q-card-section>
+        <div class="row no-wrap items-center">
+          <q-avatar
+            square
+            style="height: 300px; width: 300px"
+          >
+            <img alt="Logo" :src="logo" />
+          </q-avatar>
+        </div>
+      </q-card-section>
+    </q-card>
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps } from 'vue'
-defineProps<{ msg: string }>()
-const count = ref(0)
+import logo from 'src/assets/quasar-logo-vertical.svg'
 </script>
