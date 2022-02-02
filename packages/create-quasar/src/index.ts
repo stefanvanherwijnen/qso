@@ -80,14 +80,19 @@ export const renderTemplate = ({
   /**
    * General Quasar project files
    */
+  // render({
+  //   inputPath: new URL('./package.json.hbs', templatesDir),
+  //   outputPath: new URL(`./package.json`, outputDir),
+  //   templateVariables
+  // })
+  // render({
+  //   inputPath: new URL('./quasar.conf.js', templatesDir),
+  //   outputPath: new URL(`./quasar.conf.js`, outputDir),
+  //   templateVariables
+  // })
   render({
-    inputPath: new URL('./package.json.hbs', templatesDir),
-    outputPath: new URL(`./package.json`, outputDir),
-    templateVariables
-  })
-  render({
-    inputPath: new URL('./quasar.conf.js', templatesDir),
-    outputPath: new URL(`./quasar.conf.js`, outputDir),
+    inputPath: new URL('./.gitignore', templatesDir),
+    outputPath: new URL(`./.gitignore`, outputDir),
     templateVariables
   })
 
