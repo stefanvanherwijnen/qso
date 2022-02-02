@@ -1,8 +1,13 @@
 {
   "name": "@qso/create-quasar",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "author": "Stefan van Herwijnen",
+  "license": "MIT",
   "main": "dist/cli.js",
   "type": "module",
+  "bin": {
+    "create-quasar": "dist/cli.js"
+  },
   "scripts": {
     "build": "tsc",
     "render": "node dist/cli.js",
@@ -13,12 +18,9 @@
     "url": "git+https://github.com/stefanvanherwijnen/quasar-app-vite.git",
     "directory": "packages/create-quasar"
   },
-  "author": "Stefan van Herwijnen",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/stefanvanherwijnen/quasar-app-vite/issues"
   },
-  "homepage": "https://github.com/stefanvanherwijnen/quasar-app-vite/packages/create-quasar#readme",
   "dependencies": {
     "handlebars": "^4.7.7",
     "inquirer": "^8.2.0",
