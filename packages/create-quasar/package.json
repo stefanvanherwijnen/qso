@@ -1,6 +1,6 @@
 {
   "name": "@qso/create-quasar",
-  "version": "0.1.2",
+  "version": "0.1.0",
   "author": "Stefan van Herwijnen",
   "license": "MIT",
   "main": "dist/cli.js",
