@@ -1,23 +1,27 @@
 ## Roadmap
 
-- [ ] Finish the roadmap
+- [ ] Documentation
 - [x] Create an executable which can be executed inside a Quasar project
-- [ ] Add development and production server commands
-  - [x] Development server: quasar-vite dev
+- Development and production server
+  - [x] Development server: qso dev
+  - [ ] Port `quasar serve`
   - [ ] Add proper logging when using SSR dev server
-  - [ ] Build command
-    - [x] CSR build
-    - [ ] SSR build
-    - [ ] SSG build
-- [ ] Finish the Quasar Vite plugin
+- Build modes
+  - [x] CSR build
+  - [x] SSR build
+  - [x] SSG build
+  - [ ] Build modes for apps (Capacitor, Tauri etc)
+- Finish the Quasar Vite plugin
   - [x] Make it compatible with default Vue Vite projects
   - [x] Make sure that all auto-imports work correctly
   - [ ] Support TypeScript quasar.conf file
-- [ ] Port Quasar features
+  - [ ] Tree-shakeable CSS
+- Port Quasar features
   - [x] Boot files
-  - [] App extensions
-    - [ ] Index API
+  - [ ] App extensions
+    - [x] Index API (not feature complete)
     - [ ] Install API
     - [ ] Promps API
     - [ ] Uninstall API
+  - [x] quasar-variables.sass support
   - [ ] ...
