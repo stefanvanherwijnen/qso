@@ -5,7 +5,7 @@ import { baseConfig } from '../index.js'
 import parseArgs from 'minimist'
 import { appDir } from '../app-urls.js'
 import { promises as fs, existsSync } from 'fs'
-import { injectSsrContext } from '../helpers/ssr.js'
+import { injectSsrContext } from '../../ssr/helpers.js'
 import { routesToPaths } from '../helpers/routes.js'
 
 const argv = parseArgs(process.argv.slice(2), {

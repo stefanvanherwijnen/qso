@@ -1,6 +1,5 @@
 import { createApp } from '../main'
 import { renderToString } from '@vue/server-renderer'
-import { injectSsrContext } from '../src/helpers/ssr'
 // import * as ApolloSSR from '@vue/apollo-ssr'
 // import { ApolloClients } from '@vue/apollo-composable'
 // import serialize from 'serialize-javascript'
