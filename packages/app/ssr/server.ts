@@ -3,7 +3,7 @@ import { readFileSync } from 'fs'
 import fastifyStatic from 'fastify-static'
 import { resolve } from 'path'
 import sensible from 'fastify-sensible'
-import { injectSsrContext } from './helpers.js'
+import { injectSsrContext } from '../src/helpers/ssr.js'
 import { setup } from 'virtual:fastify-setup'
 export const createApp = ({
   setup

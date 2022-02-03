@@ -151,7 +151,8 @@ export const baseConfig = async ({
         { find: 'boot', replacement: new URL('boot/', srcDir).pathname },
         { find: 'assets', replacement: new URL('assets/', srcDir).pathname },
         { find: 'vue', replacement: new URL('node_modules/vue', appDir).pathname },
-        { find: 'vue-router', replacement: new URL('node_modules/vue-router', appDir).pathname }
+        { find: 'vue-router', replacement: new URL('node_modules/vue-router', appDir).pathname },
+        { find: '@qso/app', replacement: cliDir.pathname }
       ]
     },
     build: {

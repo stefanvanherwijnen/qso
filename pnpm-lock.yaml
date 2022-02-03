@@ -45,6 +45,7 @@ importers:
       '@quasar/extras': 1.12.4
       '@vitejs/plugin-vue': 2.1.0_vite@2.7.13
       '@vue/compiler-sfc': 3.2.29
+      '@vue/server-renderer': 3.2.29
       builtin-modules: 3.2.0
       chalk: 5.0.0
       compression: 1.7.4
@@ -71,7 +72,6 @@ importers:
       '@types/glob': 7.2.0
       '@types/merge-deep': 3.0.0
       '@types/minimist': 1.2.2
-      '@vue/server-renderer': 3.2.29
       typescript: 4.5.5
       vue-router: 4.0.12
 
@@ -1480,12 +1480,14 @@ packages:
       '@vue/shared': 3.2.29
       estree-walker: 2.0.2
       source-map: 0.6.1
+    dev: false
 
   /@vue/compiler-dom/3.2.29:
     resolution: {integrity: sha512-y26vK5khdNS9L3ckvkqJk/78qXwWb75Ci8iYLb67AkJuIgyKhIOcR1E8RIt4mswlVCIeI9gQ+fmtdhaiTAtrBQ==}
     dependencies:
       '@vue/compiler-core': 3.2.29
       '@vue/shared': 3.2.29
+    dev: false
 
   /@vue/compiler-sfc/3.2.29:
     resolution: {integrity: sha512-X9+0dwsag2u6hSOP/XsMYqFti/edvYvxamgBgCcbSYuXx1xLZN+dS/GvQKM4AgGS4djqo0jQvWfIXdfZ2ET68g==}
@@ -1507,6 +1509,7 @@ packages:
     dependencies:
       '@vue/compiler-dom': 3.2.29
       '@vue/shared': 3.2.29
+    dev: false
 
   /@vue/devtools-api/6.0.0-beta.21.1:
     resolution: {integrity: sha512-FqC4s3pm35qGVeXRGOjTsRzlkJjrBLriDS9YXbflHLsfA9FrcKzIyWnLXoNm+/7930E8rRakXuAc2QkC50swAw==}
@@ -1549,7 +1552,7 @@ packages:
     dependencies:
       '@vue/compiler-ssr': 3.2.29
       '@vue/shared': 3.2.29
-    dev: true
+    dev: false
 
   /@vue/server-renderer/3.2.29_vue@3.2.29:
     resolution: {integrity: sha512-lpiYx7ciV7rWfJ0tPkoSOlLmwqBZ9FTmQm33S+T4g0j1fO/LmhJ9b9Ctl1o5xvIFVDk9QkSUWANZn7H2pXuxVw==}
@@ -1563,6 +1566,7 @@ packages:
 
   /@vue/shared/3.2.29:
     resolution: {integrity: sha512-BjNpU8OK6Z0LVzGUppEk0CMYm/hKDnZfYdjSmPOs0N+TR1cLKJAkDwW8ASZUvaaSLEi6d3hVM7jnWnX+6yWnHw==}
+    dev: false
 
   /abstract-logging/2.0.1:
     resolution: {integrity: sha512-2BjRTZxTPvheOvGbBslFSYOUkr+SjPtOnrLP33f+VIWLzezQpZcqVg7ja3L4dBXmzzgwT+a029jRx5PCi3JuiA==}
@@ -2329,6 +2333,7 @@ packages:
 
   /estree-walker/2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
+    dev: false
 
   /esutils/2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
@@ -3904,6 +3909,7 @@ packages:
   /source-map/0.6.1:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
+    dev: false
 
   /source-map/0.7.3:
     resolution: {integrity: sha512-CkCj6giN3S+n9qrYiBTX5gystlENnRW5jZeNLHpe6aue+SrHcG5VYwujhW9s4dY31mEGsxBDrHR6oI69fTXsaQ==}

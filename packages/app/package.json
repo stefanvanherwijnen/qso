@@ -9,7 +9,7 @@
   },
   "exports": {
     ".": "./dist/index.js",
-    "./*": "./dist/*.js",
+    "./*": "./dist/*",
     "./build": "./dist/node/build.js",
     "./dev": "./dist/node/dev.js",
     "./help": "./dist/node/help.js",
@@ -70,6 +70,7 @@
     "main.ts",
     "quasar-extras.ts",
     "quasar-wrappers.ts",
+    "src/helpers/ssr.ts",
     "!dist/**/*.test.js",
     "!dist/**/test.js"
   ]
