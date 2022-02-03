@@ -65,6 +65,11 @@
   "files": [
     "dist",
     "index.html",
+    "ssr",
+    "csr",
+    "main.ts",
+    "quasar-extras.ts",
+    "quasar-wrappers.ts",
     "!dist/**/*.test.js",
     "!dist/**/test.js"
   ]
