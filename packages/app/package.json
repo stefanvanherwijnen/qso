@@ -64,6 +64,7 @@
   },
   "files": [
     "dist",
+    "index.html",
     "!dist/**/*.test.js",
     "!dist/**/test.js"
   ]
