@@ -3,7 +3,6 @@
     <hello-world>
     </hello-world>
   </q-page>
-  <q-calendar></q-calendar>
 </template>
 
 <script setup lang="ts">

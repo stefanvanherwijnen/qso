@@ -2,7 +2,7 @@
 
 // require('../lib/node-version-check')
 // require('../lib/helpers/cli-error-handling')
-export {}
+export { }
 
 const commands = [
   // 'dev',
@@ -47,7 +47,7 @@ if (cmd) {
       process.exit(0)
     }
 
-    const { log, warn } = await import('@qso/app/helpers/logger')
+    const { log, warn } = await import('../helpers/logger.js')
 
     if (cmd === '-h' || cmd === '--help') {
       cmd = 'help'

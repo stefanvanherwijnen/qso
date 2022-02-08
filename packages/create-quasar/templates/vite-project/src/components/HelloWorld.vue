@@ -15,4 +15,5 @@
 
 <script lang="ts" setup>
 import logo from '../assets/quasar-logo-vertical.svg'
+const name = 'HelloWorld'
 </script>

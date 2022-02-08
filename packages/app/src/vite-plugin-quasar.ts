@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import Components from 'unplugin-vue-components/vite'
 import { prepareQuasarConf } from './quasar-conf-file.js'
 import { FastifyInstance } from 'fastify'
-import { appDir, cliDir, quasarDir } from './app-urls.js'
+import { quasarDir } from './app-urls.js'
 import { QuasarConf } from './quasar-conf-file.js'
 import { generateImportMap } from './import-map.js'
 import { IndexAPI } from './app-extension/IndexAPI.js'
@@ -27,6 +27,7 @@ function lowerCamelCase (name: string) {
 export interface Configuration {
   version?: string,
   ssr?: 'server' | 'client' | 'ssg' | false,
+  appDir?: URL,
   quasarConf?: Partial<QuasarConf> | ((ctx: Record<string, any>) => Partial<QuasarConf>),
   // quasarExtensionIndexScripts?: ((api: any) => void)[], 
   quasarSassVariables?: boolean
@@ -36,6 +37,7 @@ export const QuasarPlugin = async ({
   version,
   ssr = false,
   quasarConf,
+  appDir,
   // quasarExtensionIndexScripts,
   quasarSassVariables
 }: Configuration = {}): Promise<Plugin[]> => {
@@ -47,6 +49,19 @@ export const QuasarPlugin = async ({
       ssr: !!ssr
     }
   }
+
+  let cliDir: URL
+  let srcDir: URL
+  let cwd: URL
+  if (appDir) {
+    srcDir = new URL('/src', appDir);
+    ({ appDir: cwd, cliDir } = await import('./app-urls.js'))
+  } else {
+    ({ appDir, cliDir, srcDir } = await import('./app-urls.js'))
+    cwd = appDir
+  }
+  const quasarDir = new URL('node_modules/quasar/', appDir)
+
   let parsedQuasarConf: QuasarConf
   if (quasarConf) {
     if (typeof quasarConf === 'function') {
@@ -59,7 +74,7 @@ export const QuasarPlugin = async ({
   let isPwa = false
 
   let bootFilePaths: Record<string, any> = {}
-  let fastifySetup = (fastify: FastifyInstance) => {}
+  let fastifySetup = (fastify: FastifyInstance) => { }
 
   let quasarExtensionIndexScripts = []
   if (!parsedQuasarConf.appExtensions) {
@@ -105,13 +120,13 @@ export const QuasarPlugin = async ({
   //   afterDev (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
   //   beforeBuild (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
   //   afterBuild (fn: (api: any, { quasarConf }: { quasarConf: Record<string, any> }) => Promise<any>) {},
-  
+
   // }
 
   if (quasarExtensionIndexScripts) {
     for (let index of quasarExtensionIndexScripts) {
       index(IndexAPI(ctx, parsedQuasarConf))
-    } 
+    }
   }
 
   if (parsedQuasarConf?.pwa) {
@@ -167,20 +182,20 @@ export const QuasarPlugin = async ({
   const components = parsedQuasarConf?.framework.components
   const plugins = parsedQuasarConf?.framework.plugins
   const css = parsedQuasarConf?.css.map((v => {
-        if (v[0] === '~') {
-          return v.slice(1)
-        }
-        return v
-       })).map((v) => `@import '${v}'`)
+    if (v[0] === '~') {
+      return v.slice(1)
+    }
+    return v
+  })).map((v) => `@import '${v}'`)
   const extras = parsedQuasarConf?.extras
 
-  if (quasarSassVariables) {
-    css.push(`@import 'src/quasar-variables.sass'`)
-  } else if (parsedQuasarConf.sassVariables) {
-    for (let variable in parsedQuasarConf.sassVariables) {
-      css.push(`${variable}: ${parsedQuasarConf.sassVariables[variable]}`)
-    }
-  }
+  // if (quasarSassVariables) {
+  //   css.push(`@import 'src/quasar-variables.sass'`)
+  // } else if (parsedQuasarConf.sassVariables) {
+  //   for (let variable in parsedQuasarConf.sassVariables) {
+  //     css.push(`${variable}: ${parsedQuasarConf.sassVariables[variable]}`)
+  //   }
+  // }
 
   return [
     {
@@ -195,10 +210,6 @@ export const QuasarPlugin = async ({
         }
         return code
       }
-    },
-    {
-      name: 'merge-quasar-conf-vite',
-      config: (config, env) => parsedQuasarConf?.vite
     },
     Components({
       resolvers: [
@@ -218,10 +229,20 @@ export const QuasarPlugin = async ({
       name: 'vite-plugin-quasar',
       enforce: 'pre',
       config: (config, env) => {
+        /** @ts-ignore */
+        if (!quasarSassVariables && config.quasar.sassVariables) quasarSassVariables = config.quasar.sassVariables
+        console.log(quasarSassVariables)
+        if (quasarSassVariables) {
+          css.push(`@import 'src/quasar-variables.sass'`)
+        } else if (parsedQuasarConf.sassVariables) {
+          for (let variable in parsedQuasarConf.sassVariables) {
+            css.push(`${variable}: ${parsedQuasarConf.sassVariables[variable]}`)
+          }
+        }
         return {
           resolve: {
             alias: [
-              { find: 'quasar/wrappers', replacement: new URL('quasar-wrappers.ts', cliDir ).pathname },
+              { find: 'quasar/wrappers', replacement: new URL('quasar-wrappers.ts', cliDir).pathname },
               { find: 'quasar/vue-plugin', replacement: new URL('src/vue-plugin.js', quasarDir).pathname },
               { find: 'quasar/directives', replacement: new URL('src/directives.js', quasarDir).pathname },
               { find: 'quasar/src', replacement: new URL('src/', quasarDir).pathname },
@@ -275,30 +296,34 @@ export const QuasarPlugin = async ({
           return `export const quasarConf = ${JSON.stringify(quasarConf || {})}`
         }
         if (id === 'virtual:quasar-plugins') {
-            const imports = plugins?.map((plugin: string) => `import { ${plugin} } from 'quasar'`)
-            return importExportLiteral(imports, plugins)
+          const imports = plugins?.map((plugin: string) => `import { ${plugin} } from 'quasar'`)
+          return importExportLiteral(imports, plugins)
         }
         if (id === 'virtual:quasar-components') {
           const imports = components?.map((component: string) => `import { ${component} } from 'quasar'`)
-            return {
-              code: importExportLiteral(imports, components),
-              moduleSideEffects: 'no-treeshake'
-            }
+          return {
+            code: importExportLiteral(imports, components),
+            moduleSideEffects: 'no-treeshake'
+          }
         }
         if (id === 'virtual:quasar-extras') {
-            const imports = extras?.map((extra: string) => `import ${lowerCamelCase(extra)} from '@quasar/extras/${extra}/${extra}.css'`)
-            return importExportLiteral(imports, extras?.map((extra: string) => lowerCamelCase(extra)))      
+          const imports = extras?.map((extra: string) => `import ${lowerCamelCase(extra)} from '@quasar/extras/${extra}/${extra}.css'`)
+          return importExportLiteral(imports, extras?.map((extra: string) => lowerCamelCase(extra)))
         }
         if (id === 'virtual:quasar-boot') {
-            const bootFiles = Object.keys(bootFilePaths)
-            const imports = bootFiles?.map((boot: string) => `import ${lowerCamelCase(boot)} from '${bootFilePaths[boot].path}'`)
-            return importExportLiteral(imports, bootFiles?.map((boot: string) => lowerCamelCase(boot)))
+          const bootFiles = Object.keys(bootFilePaths)
+          const imports = bootFiles?.map((boot: string) => `import ${lowerCamelCase(boot)} from '${bootFilePaths[boot].path}'`)
+          return importExportLiteral(imports, bootFiles?.map((boot: string) => lowerCamelCase(boot)))
         }
         if (id === 'virtual:fastify-setup') {
-            return `export const setup = ${String(fastifySetup)}`
+          return `export const setup = ${String(fastifySetup)}`
         }
         return null
       }
+    },
+    {
+      name: 'merge-quasar-conf-vite',
+      config: (config, env) => parsedQuasarConf?.vite
     },
     ...extraPlugins
   ]

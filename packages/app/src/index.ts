@@ -8,24 +8,26 @@ import { appDir, cliDir, srcDir } from './app-urls.js'
 
 export const baseConfig = async ({
   ssr,
-  paths
+  productName,
+  appDir,
+  publicDir
 }: {
   ssr?: 'client' | 'server' | 'ssg',
-  paths?: {
-    appDir: URL,
-    srcDir: URL
-  }
+  productName?: string,
+  appDir?: URL,
+  publicDir?: URL
 }): Promise<InlineConfig> => {
-  let appDir: URL
   let cliDir: URL
   let srcDir: URL
-  if (paths) {
-    appDir = paths.appDir
-    srcDir = paths.srcDir;
-    ({ cliDir } = await import('./app-urls.js'))
+  let cwd: URL
+  if (appDir) {
+    srcDir = new URL('src/', appDir);
+    ({ appDir: cwd, cliDir } = await import('./app-urls.js'))
   } else {
     ({ appDir, cliDir, srcDir } = await import('./app-urls.js'))
+    cwd = appDir
   }
+  if (!publicDir) publicDir = new URL('public/', appDir)
   /**
    * TODO:Perform some manual check if command is run inside a Quasar Project
    */
@@ -54,7 +56,7 @@ export const baseConfig = async ({
   //   for (let ext of Object.keys(quasarExtensions)) {
   //     const path = getAppExtensionPath(ext)
   //     const { main, exports } = JSON.parse(readFileSync(new URL(`node_modules/${path}/package.json`, appDir).pathname, 'utf-8'))
-      
+
   //     let IndexAPI
   //     try {
   //       ({ IndexAPI } = (await import(new URL(exports['./api'], new URL(`node_modules/${path}/`, appDir)).pathname)))
@@ -75,9 +77,16 @@ export const baseConfig = async ({
     quasarSassVariables = true
   }
 
+  console.log(publicDir)
   return {
     root: cliDir.pathname,
-    publicDir: new URL('public/', appDir).pathname,
+    publicDir: publicDir.pathname,
+    /** @ts-ignore */
+    quasar: {
+      appDir,
+      cwd,
+      conf: quasarConf
+    },
     plugins: [
       {
         name: 'html-transform',
@@ -131,6 +140,7 @@ export const baseConfig = async ({
       await QuasarPlugin({
         version,
         quasarConf,
+        appDir,
         // quasarExtensionIndexScripts,
         quasarSassVariables,
         ssr: ssr,
@@ -148,8 +158,10 @@ export const baseConfig = async ({
       alias: [
         { find: 'src', replacement: srcDir.pathname },
         { find: 'app', replacement: appDir.pathname },
+        { find: 'cwd', replacement: cwd.pathname },
         { find: 'boot', replacement: new URL('boot/', srcDir).pathname },
         { find: 'assets', replacement: new URL('assets/', srcDir).pathname },
+        // { find: 'node_modules', replacement: new URL('node_modules', appDir).pathname },
         { find: 'vue', replacement: new URL('node_modules/vue', appDir).pathname },
         { find: 'vue-router', replacement: new URL('node_modules/vue-router', appDir).pathname },
         { find: '@qso/app', replacement: cliDir.pathname }

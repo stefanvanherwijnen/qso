@@ -7,12 +7,12 @@ import { searchForWorkspaceRoot } from 'vite'
 import { Server } from 'net'
 import fastify, { FastifyInstance } from 'fastify'
 import middie from 'middie'
-import { appDir, cliDir } from '../app-urls.js'
+import { cliDir, parsePath } from '../app-urls.js'
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
     m: 'mode',
   },
-  string: ['m', 'host'],
+  string: ['m', 'host', 'appDir', 'publicDir'],
   default: {
     m: 'csr',
     host: '127.0.0.1'
@@ -23,13 +23,17 @@ export async function createServer ({
   port,
   logLevel,
   mode,
-  host
+  host,
+  appDir,
+  publicDir
 }:
   {
     port?: number,
     logLevel?: LogLevel,
     mode?: 'csr' | 'ssr',
-    host?: string
+    host?: string,
+    appDir?: URL,
+    publicDir?: URL
   } = {
     port: 3000,
     logLevel: 'info',
@@ -41,7 +45,9 @@ export async function createServer ({
    */
   let vite: ViteDevServer
   const config = (await baseConfig({
-    ssr: mode === 'ssr' ? 'server' : undefined
+    ssr: mode === 'ssr' ? 'server' : undefined,
+    appDir,
+    publicDir
   }))
   config.logLevel = logLevel
   config.server = {
@@ -79,7 +85,6 @@ export async function createServer ({
       try {
         // const url = req.originalUrl
         const url = req.raw.url
-
         let template
         let render
         const ssrContext = {
@@ -117,7 +122,7 @@ export async function createServer ({
         res.send(e.stack)
       }
     })
-    await app.listen(port || 3000, host || '127.0.0.1')
+    await app.listen(port || 3000, host === '' ? '0.0.0.0' : '127.0.0.1')
     server = app.server
   } else {
     server = (await vite.listen()).httpServer as Server
@@ -129,16 +134,21 @@ export async function createServer ({
 let server: Server
 let vite: ViteDevServer
 
+console.log(parsePath(argv.appDir))
 switch (argv.mode) {
   case 'ssr':
     ({ server, vite } = await createServer({
       mode: 'ssr',
-      host: argv.host
+      host: argv.host,
+      appDir: parsePath(argv.appDir),
+      publicDir: parsePath(argv.publicDir)
     }))
     break;
   default:
     ({ server, vite } = await createServer({
-      host: argv.host
+      host: argv.host,
+      appDir: parsePath(argv.appDir),
+      publicDir: parsePath(argv.publicDir)
     }))
     break;
 }

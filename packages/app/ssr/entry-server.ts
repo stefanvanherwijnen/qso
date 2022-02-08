@@ -15,7 +15,9 @@ const initializeApp = async (url, ssrContext) => {
 
   const { app, router, routes } = await createApp('server', ssrContext)
   // set the router to the desired URL before rendering
+
   router.push({ path: url })
+  ssrContext.initialState = {}
 
   onRenderedList.forEach(fn => { fn() })
 

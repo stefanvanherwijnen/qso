@@ -13,8 +13,8 @@ import chalk from 'chalk'
 
 console.log(`
   Example usage
-    $ quasar-vite <command> <options>
+    $ qso <command> <options>
   => IMPORTANT !
-  => ${chalk.italic('Trigger this inside of a Quasar project (and npm/yarn install).')}
+  => ${chalk.italic('Trigger this inside of a Quasar project (and npm/yarn install), or define the app root with --appDir.')}
   --------------
 `)

@@ -21,10 +21,10 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.12.4",
-    "@vue/server-renderer": "^3.2.29",
-    "builtin-modules": "^3.2.0",
     "@vitejs/plugin-vue": "^2.0.1",
     "@vue/compiler-sfc": "^3.2.29",
+    "@vue/server-renderer": "^3.2.29",
+    "builtin-modules": "^3.2.0",
     "chalk": "^5.0.0",
     "compression": "^1.7.4",
     "cross-env": "^7.0.3",
@@ -51,6 +51,7 @@
     "@types/glob": "^7.2.0",
     "@types/merge-deep": "^3.0.0",
     "@types/minimist": "^1.2.2",
+    "quasar": "^2.5.4",
     "typescript": "^4.5.4",
     "vue-router": "^4.0.12"
   },
