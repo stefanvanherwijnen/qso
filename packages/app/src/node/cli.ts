@@ -80,7 +80,7 @@ cli
 
 cli.command('dev')
   .option('-m, --mode [mode]', 'Development server mode', { default: 'csr' })
-  .option('--host [host]', 'Specify which IP addresses the server should listen on')
+  .option('--host [host]', 'Specify which IP addresses the server should listen on', { default: '127.0.0.1' })
   .option('--appDir [appDir]', 'Application directory')
   .option('--publicDir [publicDir]', 'Public directory')
   .action(async (options) => {
