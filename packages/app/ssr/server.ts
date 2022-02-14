@@ -36,14 +36,14 @@ export const createApp = ({
     }
     template = readFileSync(resolve('../client/index.html')).toString()
     manifest = JSON.parse(readFileSync(resolve('../client/ssr-manifest.json')).toString())
-    render = (await import(resolve('./entry-server.js'))).render
-    
+    render = (await import(resolve('./entry-server.mjs'))).render
+
     const [appHtml, preloadLinks] = await render(url, manifest, ssrContext)
 
     let html = template
       .replace(`<!--preload-links-->`, preloadLinks)
       .replace(`<!--app-html-->`, appHtml)
-
+      .replace('<!--initial-state-->', ssrContext.initialState)
     html = injectSsrContext(html, ssrContext)
 
     res.code(200)

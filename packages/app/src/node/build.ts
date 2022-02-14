@@ -1,34 +1,11 @@
 #!/usr/bin/node --experimental-specifier-resolution=node
-import { build } from 'vite'
-import { resolve } from 'path'
 import { baseConfig } from '../index.js'
-import parseArgs from 'minimist'
-import { appDir } from '../app-urls.js'
-import { promises as fs, existsSync } from 'fs'
-import { injectSsrContext } from '../helpers/ssr.js'
+import { promises as fs } from 'fs'
 import { routesToPaths } from '../helpers/routes.js'
+import { injectSsrContext } from '../helpers/ssr.js'
+import { build } from 'vite'
 
-const argv = parseArgs(process.argv.slice(2), {
-  alias: {
-    m: 'mode',
-    // T: 'target',
-    // A: 'arch',
-    // b: 'bundler',
-    // s: 'skip-pkg',
-    // i: 'ide',
-    // d: 'debug',
-    // h: 'help',
-    // P: 'publish'
-  },
-  // boolean: ['h', 'd', 'u', 'i'],
-  // string: ['m', 'T', 'P'],
-  string: ['base', 'outDir'],
-  default: {
-    m: 'csr'
-  }
-})
-
-const prerender = async ({
+export const prerender = async ({
   outDir,
   templatePath,
   manifestPath,
@@ -67,16 +44,18 @@ const prerender = async ({
   return Promise.all(promises)
 }
 
-async function buildQuasar (opts: { ssr?: 'client' | 'server' | 'ssg', base?: string, outDir?: string }) {
+export async function buildQuasar (opts: { ssr?: 'client' | 'server' | 'ssg', base?: string, outDir?: string, appDir?: URL, publicDir?: URL }) {
   let config = await baseConfig({
-    ssr: opts?.ssr
+    ssr: opts?.ssr,
+    appDir: opts.appDir,
+    publicDir: opts.publicDir
   })
 
   config.build = {
     ...config.build,
     minify: false,
     outDir: opts.outDir,
-    emptyOutDir: !!opts.outDir
+    emptyOutDir: !!opts.outDir,
   }
 
   return build({
@@ -85,55 +64,4 @@ async function buildQuasar (opts: { ssr?: 'client' | 'server' | 'ssg', base?: st
     // logLevel: 'silent',
     ...config
   })
-}
-
-let baseOutDir: URL
-if (argv.outDir) {
-  if (argv.outDir.slice(-1) !== '/') argv.outDir + '/'
-  baseOutDir = new URL(`file://${argv.outDir}`)
-} else {
-  baseOutDir = new URL('dist/', appDir)
-}
-
-
-switch (argv.mode) {
-  case 'csr':
-    await buildQuasar({
-      base: argv.base,
-      outDir: new URL('spa/', baseOutDir).pathname
-    })
-    break;
-  case 'ssr':
-    await buildQuasar({
-      ssr: 'client',
-      base: argv.base,
-      outDir: new URL('ssr/client/', baseOutDir).pathname
-    })
-    await buildQuasar({
-      ssr: 'server',
-      base: argv.base,
-      outDir: new URL('ssr/server/', baseOutDir).pathname
-    })
-    break;
-  case 'ssg':
-    await buildQuasar({
-      ssr: 'client',
-      base: argv.base,
-      outDir: new URL('static/', baseOutDir).pathname
-    })
-    await buildQuasar({
-      ssr: 'server',
-      base: argv.base,
-      outDir: new URL('ssr/server/', baseOutDir).pathname
-    })
-    prerender({
-      outDir: new URL('static/', baseOutDir).pathname,
-      templatePath: new URL('static/index.html', baseOutDir).pathname,
-      manifestPath: new URL('static/ssr-manifest.json', baseOutDir).pathname,
-      entryServerPath: new URL('ssr/server/entry-server.js', baseOutDir).pathname
-    })
-    break;
-  default:
-    console.log('Invalid build mode')
-    break;
 }

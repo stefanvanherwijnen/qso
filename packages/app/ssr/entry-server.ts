@@ -1,4 +1,4 @@
-import { createApp } from '../main'
+import { createApp } from '../main.js'
 import { renderToString } from '@vue/server-renderer'
 // import * as ApolloSSR from '@vue/apollo-ssr'
 // import { ApolloClients } from '@vue/apollo-composable'
@@ -15,7 +15,9 @@ const initializeApp = async (url, ssrContext) => {
 
   const { app, router, routes } = await createApp('server', ssrContext)
   // set the router to the desired URL before rendering
+
   router.push({ path: url })
+  ssrContext.initialState = {}
 
   onRenderedList.forEach(fn => { fn() })
 

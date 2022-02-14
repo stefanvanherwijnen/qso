@@ -1,4 +1,4 @@
-import { createApp } from '../main'
+import { createApp } from '../main.js'
 
 // const { app, router } = createApp()
 createApp('client').then(({ app, router }) => {

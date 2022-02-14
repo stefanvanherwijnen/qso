@@ -4,18 +4,29 @@
     "module": "esnext",
     "moduleResolution": "Node",
     "target": "ES2020",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "types": ["vite/client"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "types": [
+      "vite/client"
+    ],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "baseUrl": "./",
+    "preserveSymlinks": true,
     "resolveJsonModule": true,
     "outDir": "./dist",
     "declaration": true,
     "declarationDir": "dist/types",
     "paths": {
-      "@qso/app": ["./src/index"],
-      "@qso/app/*": ["./src/*"],
+      "@qso/app": [
+        "./src/index"
+      ],
+      "@qso/app/*": [
+        "./src/*"
+      ],
     }
   },
   "include": [

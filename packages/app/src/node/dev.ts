@@ -1,35 +1,28 @@
-import { readFileSync } from 'fs'
-import { LogLevel, ViteDevServer } from 'vite'
-import { printHttpServerUrls, log } from '../helpers/logger.js'
-import { baseConfig } from '../index.js'
-import parseArgs from 'minimist'
+import type { ViteDevServer, LogLevel } from 'vite'
 import { searchForWorkspaceRoot } from 'vite'
-import { Server } from 'net'
-import fastify, { FastifyInstance } from 'fastify'
+import { cliDir } from '../app-urls.js'
+import { baseConfig } from '../index.js'
+import type { Server } from 'net'
+import type { FastifyInstance } from 'fastify/types/instance'
+import fastify from 'fastify'
 import middie from 'middie'
-import { appDir, cliDir } from '../app-urls.js'
-const argv = parseArgs(process.argv.slice(2), {
-  alias: {
-    m: 'mode',
-  },
-  string: ['m', 'host'],
-  default: {
-    m: 'csr',
-    host: '127.0.0.1'
-  }
-})
+import { readFileSync } from 'fs'
 
 export async function createServer ({
   port,
   logLevel,
   mode,
-  host
+  host,
+  appDir,
+  publicDir
 }:
   {
     port?: number,
     logLevel?: LogLevel,
     mode?: 'csr' | 'ssr',
-    host?: string
+    host?: string,
+    appDir?: URL,
+    publicDir?: URL
   } = {
     port: 3000,
     logLevel: 'info',
@@ -41,7 +34,9 @@ export async function createServer ({
    */
   let vite: ViteDevServer
   const config = (await baseConfig({
-    ssr: mode === 'ssr' ? 'server' : undefined
+    ssr: mode === 'ssr' ? 'server' : undefined,
+    appDir,
+    publicDir
   }))
   config.logLevel = logLevel
   config.server = {
@@ -79,7 +74,6 @@ export async function createServer ({
       try {
         // const url = req.originalUrl
         const url = req.raw.url
-
         let template
         let render
         const ssrContext = {
@@ -117,7 +111,7 @@ export async function createServer ({
         res.send(e.stack)
       }
     })
-    await app.listen(port || 3000, host || '127.0.0.1')
+    await app.listen(port || 3000, host === '' ? '0.0.0.0' : '127.0.0.1')
     server = app.server
   } else {
     server = (await vite.listen()).httpServer as Server
@@ -125,22 +119,3 @@ export async function createServer ({
   return { server, vite }
 
 }
-
-let server: Server
-let vite: ViteDevServer
-
-switch (argv.mode) {
-  case 'ssr':
-    ({ server, vite } = await createServer({
-      mode: 'ssr',
-      host: argv.host
-    }))
-    break;
-  default:
-    ({ server, vite } = await createServer({
-      host: argv.host
-    }))
-    break;
-}
-log('Dev server running at:')
-printHttpServerUrls(server, vite.config)

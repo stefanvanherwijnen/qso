@@ -1,6 +1,6 @@
-# Vite support for Quasar
+# Vite build tool for Quasar Framework
 
-Unofficial Vite support for Quasar based on @quasar/app.
+Unofficial Vite build tool for Quasar Framework. Build and development server support for client-side- and server side rendering.
 
 # Try it out
 ```bash
@@ -23,18 +23,16 @@ Use `pnpm exec` to run the following commands:
   - `-m`: Build mode: `csr` or `ssr`
   - `--host`: https://vitejs.dev/config/#server-host
 
+Or install `@qso/app` globally.
+
 ## Features
 
-- When using @qso/app all Quasar UI features should work out of the box.
-- QuasarPlugin can be imported if you want to setup your own Vite project.
+- In essence @qso/app functions as a preset for Vite
+  - When using @qso/app all Quasar UI features should work out of the box.
+  - Any Quasar specific configurations are set with the `quasar` object in the Vite config.
 
 - Build modes for client-side rendering, server side rendering and static site generation.
-- Support for quasar.conf.js as an argument to the Vite plugin.
-- Support for quasar.extensions.json (directly or as an argument to quasar.conf.js).
-- Support for quasar-variables.sass (directly or as an argument to quasar.conf.js).
-## quasar.conf.js
-
-A lot of entries from quasar.conf.js are deprecated and some new ones are added: [quasar.conf](packages/app/src/quasar-conf-file.ts)
+- The new [quasar.config.js](packages/app/src/quasar-vite-config.ts) file is the vite.config.js file in your Quasar project. It will be merged with the defaults upon compilation.
 
 ## Development project
 

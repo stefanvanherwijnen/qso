@@ -30,6 +30,15 @@ export async function createApp (ssr?: 'client' | 'server', ssrContext?: ssrCont
   const router = createRouter()
   app.use(router)
 
+  // Workaround to fix hydration errors when serving html files directly
+  router.beforeEach((to, from, next) => {
+    if (to.path.endsWith('.html')) {
+      next({ path: to.path.replace('.html', '') })
+    }
+
+    next()
+  })
+
   app.use(Quasar, {
     plugins: quasarPlugins,
     components: quasarComponents,
