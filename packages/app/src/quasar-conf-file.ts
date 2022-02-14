@@ -1,9 +1,4 @@
-import { UserConfig } from 'vite'
-
-import { VitePWAOptions } from 'vite-plugin-pwa'
-
 import merge from 'merge-deep'
-import { FastifyInstance } from 'fastify'
 export interface QuasarConf {
   ctx: Record<string, any>
   css: string[],
@@ -17,7 +12,7 @@ export interface QuasarConf {
   extras: string[],
   /** vite-plugin-pwa settings */
   // TODO: Implement PWA support or entirely move it to the vite plugin
-  pwa?: VitePWAOptions,
+  pwa?: boolean,
 }
 
 export const prepareQuasarConf = (conf?: Partial<QuasarConf>) => {
