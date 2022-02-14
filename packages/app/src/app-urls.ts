@@ -4,11 +4,13 @@ export const srcDir = new URL('src/', appDir)
 export const quasarDir = new URL('node_modules/quasar/', appDir)
 
 export const parsePath = (path: string) => {
-  if (path.slice(-1) !== '/') path += '/'
-  if (path.startsWith('.')) {
-    return new URL(path, appDir)
-  } else if (path) {
-    return new URL(`file://${path}`)
+  if (path) {
+    if (path.slice(-1) !== '/') path += '/'
+    if (path.startsWith('.')) {
+      return new URL(path, appDir)
+    } else if (path) {
+      return new URL(`file://${path}`)
+    }
   }
   return
 }

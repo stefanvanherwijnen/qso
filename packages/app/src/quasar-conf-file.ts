@@ -16,36 +16,13 @@ export interface QuasarConf {
   animations: string[],
   extras: string[],
   /** vite-plugin-pwa settings */
+  // TODO: Implement PWA support or entirely move it to the vite plugin
   pwa?: VitePWAOptions,
-  /** Vite config is merged using a plugin */
-  vite?: UserConfig,
-  fastify?: {
-    /** setup() is called directly after instantiating fastify. Use it to register your own plugins, routes etc. */
-    setup: (fastify: FastifyInstance) => any
-  },
-  sassVariables: Record<string, string>,
-  appExtensions: Record<string, any>
 }
 
 export const prepareQuasarConf = (conf?: Partial<QuasarConf>) => {
   return merge({
     /** Legacy support */
-    build: {
-      transpileDependencies: [],
-      vueLoaderOptions: {
-        compilerOptions: {},
-        transformAssetUrls: {}
-      },
-      sassLoaderOptions: {},
-      scssLoaderOptions: {},
-      stylusLoaderOptions: {},
-      lessLoaderOptions: {},
-      env: {},
-      uglifyOptions: {
-        compress: {},
-        mangle: {}
-      }
-    },
     css: [],
     boot: [],
     framework: {
@@ -55,11 +32,6 @@ export const prepareQuasarConf = (conf?: Partial<QuasarConf>) => {
     },
     animations: [],
     extras: [],
-    vite: {
-      resolve: {
-        alias: []
-      }
-    }
   },
-  conf) as QuasarConf
+    conf) as QuasarConf
 }

@@ -1,4 +1,4 @@
-import { createApp } from '../main'
+import { createApp } from '../main.js'
 import { renderToString } from '@vue/server-renderer'
 // import * as ApolloSSR from '@vue/apollo-ssr'
 // import { ApolloClients } from '@vue/apollo-composable'

@@ -4,8 +4,9 @@ import { QuasarPlugin } from '@qso/app'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), await QuasarPlugin({
-    quasarConf: {
+  plugins: [vue(), await QuasarPlugin()],
+  quasar: {
+    conf: {
       extras: [
         'material-icons'
       ],
@@ -14,5 +15,5 @@ export default defineConfig({
         components: []
       }
     }
-  })]
+  }
 })

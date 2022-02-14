@@ -1,48 +1,47 @@
 import vuePlugin from '@vitejs/plugin-vue'
-import { InlineConfig, Plugin } from 'vite'
-import { readFileSync, existsSync } from 'fs'
+import { InlineConfig, mergeConfig, UserConfig } from 'vite'
+import { readFileSync } from 'fs'
 import { QuasarPlugin } from './vite-plugin-quasar.js'
 import builtinModules from 'builtin-modules'
-import { getAppExtensionPath } from './app-extension/api.js'
-import { appDir, cliDir, srcDir } from './app-urls.js'
+import { QuasarResolver } from './resolver.js'
 
 export const baseConfig = async ({
   ssr,
-  productName,
   appDir,
-  publicDir
+  publicDir,
+  command = 'build',
+  mode = 'production'
 }: {
   ssr?: 'client' | 'server' | 'ssg',
-  productName?: string,
   appDir?: URL,
-  publicDir?: URL
+  publicDir?: URL,
+  command?: 'build' | 'serve',
+  mode?: string
 }): Promise<InlineConfig> => {
   let cliDir: URL
   let srcDir: URL
   let cwd: URL
+  let quasarDir: URL
   if (appDir) {
     srcDir = new URL('src/', appDir);
+    quasarDir = new URL('node_modules/quasar/', appDir);
     ({ appDir: cwd, cliDir } = await import('./app-urls.js'))
   } else {
-    ({ appDir, cliDir, srcDir } = await import('./app-urls.js'))
+    ({ appDir, cliDir, srcDir, quasarDir } = await import('./app-urls.js'))
     cwd = appDir
   }
   if (!publicDir) publicDir = new URL('public/', appDir)
   /**
    * TODO:Perform some manual check if command is run inside a Quasar Project
    */
-  const packageJson = JSON.parse(readFileSync(new URL('package.json', appDir).pathname, { encoding: 'utf-8' }))
-
-  const quasarConf = (await import(new URL('quasar.conf.js', appDir).pathname)).default
-  // const quasarExtensionsPath = new URL('quasar.extensions.json', appDir).pathname
-  const quasarSassVariablesPath = new URL('quasar-variables.sass', srcDir).pathname
-  const quasarPkgJsonPath = new URL('node_modules/quasar/package.json', appDir).pathname
-
-  // let quasarExtensions
-  // if (existsSync(quasarExtensionsPath)) {
-  //   quasarExtensions = JSON.parse(readFileSync(quasarExtensionsPath, { encoding: 'utf-8' }))
-  // }
-  const { version } = JSON.parse(readFileSync(quasarPkgJsonPath, { encoding: 'utf-8' }))
+  let viteConfig
+  try {
+    viteConfig = (await import(new URL('quasar.config.js', appDir).pathname)).default
+  } catch (e) {
+    console.log('No quasar.config.js file found, using defaults')
+    viteConfig = {}
+  }
+  let { productName = 'Product name' } = JSON.parse(readFileSync(new URL('package.json', appDir).pathname, { encoding: 'utf-8' }))
 
   const ssrTransformCustomDir = () => {
     return {
@@ -51,41 +50,17 @@ export const baseConfig = async ({
     }
   }
 
-  // let quasarExtensionIndexScripts = []
-  // if (quasarExtensions) {
-  //   for (let ext of Object.keys(quasarExtensions)) {
-  //     const path = getAppExtensionPath(ext)
-  //     const { main, exports } = JSON.parse(readFileSync(new URL(`node_modules/${path}/package.json`, appDir).pathname, 'utf-8'))
-
-  //     let IndexAPI
-  //     try {
-  //       ({ IndexAPI } = (await import(new URL(exports['./api'], new URL(`node_modules/${path}/`, appDir)).pathname)))
-  //     } catch (e) {
-  //       console.log(e)
-  //       try {
-  //         ({ IndexAPI } = (await import(new URL(main, new URL(`node_modules/${path}/`, appDir)).pathname)))
-  //       } catch (e) {
-  //         IndexAPI = (await import(new URL('src/index.js', new URL(`node_modules/${path}/`, appDir)).pathname)).default
-  //       }
-  //     }
-  //     quasarExtensionIndexScripts.push(IndexAPI)
-  //   }
-  // }
-
-  let quasarSassVariables: boolean = false
-  if (existsSync(quasarSassVariablesPath)) {
-    quasarSassVariables = true
-  }
-
-  console.log(publicDir)
-  return {
+  return mergeConfig({
     root: cliDir.pathname,
     publicDir: publicDir.pathname,
-    /** @ts-ignore */
+    // @ts-ignore
     quasar: {
       appDir,
+      cliDir,
+      srcDir,
+      quasarDir,
       cwd,
-      conf: quasarConf
+      productName
     },
     plugins: [
       {
@@ -107,9 +82,6 @@ export const baseConfig = async ({
             html = html.replace(
               '<!--entry-script-->',
               entryScript
-            ).replace(
-              '<!--product-name-->',
-              packageJson.productName
             )
             return html
           }
@@ -138,12 +110,8 @@ export const baseConfig = async ({
         }
       ),
       await QuasarPlugin({
-        version,
-        quasarConf,
-        appDir,
-        // quasarExtensionIndexScripts,
-        quasarSassVariables,
         ssr: ssr,
+        quasarDir
       })
     ],
     optimizeDeps: {
@@ -161,7 +129,6 @@ export const baseConfig = async ({
         { find: 'cwd', replacement: cwd.pathname },
         { find: 'boot', replacement: new URL('boot/', srcDir).pathname },
         { find: 'assets', replacement: new URL('assets/', srcDir).pathname },
-        // { find: 'node_modules', replacement: new URL('node_modules', appDir).pathname },
         { find: 'vue', replacement: new URL('node_modules/vue', appDir).pathname },
         { find: 'vue-router', replacement: new URL('node_modules/vue-router', appDir).pathname },
         { find: '@qso/app', replacement: cliDir.pathname }
@@ -170,11 +137,17 @@ export const baseConfig = async ({
     build: {
       ssr: (ssr === 'server') ? true : false,
       ssrManifest: (ssr === 'client' || ssr === 'ssg'),
-      rollupOptions: {
-        input: (ssr === 'server') ? [
+      rollupOptions: (ssr === 'server') ? {
+        input: [
           new URL('ssr/entry-server.ts', cliDir).pathname,
           new URL('ssr/server.ts', cliDir).pathname
-        ] : undefined,
+        ],
+        output: {
+          entryFileNames: '[name].mjs',
+          chunkFileNames: '[name].mjs',
+          format: 'es'
+        }
+      } : {
         output: {
           format: 'es'
         }
@@ -187,7 +160,7 @@ export const baseConfig = async ({
         new RegExp(`^(?!.*(${builtinModules.join('|')}|fastify|express))`)
       ]
     }
-  }
+  } as UserConfig, viteConfig)
 }
 
-export { QuasarPlugin }
+export { QuasarPlugin, QuasarResolver }

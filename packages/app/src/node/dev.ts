@@ -1,23 +1,12 @@
-import { readFileSync } from 'fs'
-import { LogLevel, ViteDevServer } from 'vite'
-import { printHttpServerUrls, log } from '../helpers/logger.js'
-import { baseConfig } from '../index.js'
-import parseArgs from 'minimist'
+import type { ViteDevServer, LogLevel } from 'vite'
 import { searchForWorkspaceRoot } from 'vite'
-import { Server } from 'net'
-import fastify, { FastifyInstance } from 'fastify'
+import { cliDir } from '../app-urls.js'
+import { baseConfig } from '../index.js'
+import type { Server } from 'net'
+import type { FastifyInstance } from 'fastify/types/instance'
+import fastify from 'fastify'
 import middie from 'middie'
-import { cliDir, parsePath } from '../app-urls.js'
-const argv = parseArgs(process.argv.slice(2), {
-  alias: {
-    m: 'mode',
-  },
-  string: ['m', 'host', 'appDir', 'publicDir'],
-  default: {
-    m: 'csr',
-    host: '127.0.0.1'
-  }
-})
+import { readFileSync } from 'fs'
 
 export async function createServer ({
   port,
@@ -130,27 +119,3 @@ export async function createServer ({
   return { server, vite }
 
 }
-
-let server: Server
-let vite: ViteDevServer
-
-console.log(parsePath(argv.appDir))
-switch (argv.mode) {
-  case 'ssr':
-    ({ server, vite } = await createServer({
-      mode: 'ssr',
-      host: argv.host,
-      appDir: parsePath(argv.appDir),
-      publicDir: parsePath(argv.publicDir)
-    }))
-    break;
-  default:
-    ({ server, vite } = await createServer({
-      host: argv.host,
-      appDir: parsePath(argv.appDir),
-      publicDir: parsePath(argv.publicDir)
-    }))
-    break;
-}
-log('Dev server running at:')
-printHttpServerUrls(server, vite.config)
