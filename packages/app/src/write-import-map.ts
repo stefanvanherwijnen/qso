@@ -10,3 +10,5 @@ promises.writeFile(new URL('./auto-import.json', import.meta.url), JSON.stringif
     directives: '(' + autoImport.directives.join('|') + ')'
   }
 }, null, 2))
+
+promises.writeFile(new URL('./api-list.json', import.meta.url), JSON.stringify(autoImport.pascalComponents, null, 2))
