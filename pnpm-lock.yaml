@@ -29,6 +29,7 @@ importers:
       fastify-sensible: ^3.1.2
       fastify-static: ^4.5.0
       glob: ^7.2.0
+      import-meta-resolve: ^1.1.1
       magic-string: ^0.25.7
       merge-deep: ^3.0.3
       middie: ^6.0.0
@@ -55,6 +56,7 @@ importers:
       fastify-sensible: 3.1.2
       fastify-static: 4.5.0
       glob: 7.2.0
+      import-meta-resolve: 1.1.1
       magic-string: 0.25.7
       merge-deep: 3.0.3
       middie: 6.0.0
@@ -1876,6 +1878,12 @@ packages:
     resolution: {integrity: sha512-lGzLKcioL90C7wMczpkY0n/oART3MbBa8R9OFGE1rJxoVI86u4WAGfEk8Wjv10eKSyTHVGkSo3bvBylCEtk7LA==}
     engines: {node: '>=6'}
 
+  /builtins/4.0.0:
+    resolution: {integrity: sha512-qC0E2Dxgou1IHhvJSLwGDSTvokbRovU5zZFuDY6oY8Y2lF3nGt5Ad8YZK7GMtqzY84Wu7pXTPeHQeHcXSXsRhw==}
+    dependencies:
+      semver: 7.3.5
+    dev: false
+
   /bytes/3.0.0:
     resolution: {integrity: sha1-0ygVQE1olpn4Wk6k+odV3ROpYEg=}
     engines: {node: '>= 0.8'}
@@ -2762,6 +2770,12 @@ packages:
 
   /ieee754/1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
+    dev: false
+
+  /import-meta-resolve/1.1.1:
+    resolution: {integrity: sha512-JiTuIvVyPaUg11eTrNDx5bgQ/yMKMZffc7YSjvQeSMXy58DO2SQ8BtAf3xteZvmzvjYh14wnqNjL8XVeDy2o9A==}
+    dependencies:
+      builtins: 4.0.0
     dev: false
 
   /inflight/1.0.6:
