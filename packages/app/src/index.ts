@@ -4,6 +4,7 @@ import { readFileSync } from 'fs'
 import { QuasarPlugin } from './vite-plugin-quasar.js'
 import builtinModules from 'builtin-modules'
 import { QuasarResolver } from './resolver.js'
+import { resolve } from 'import-meta-resolve'
 
 export const baseConfig = async ({
   ssr,
@@ -24,7 +25,7 @@ export const baseConfig = async ({
   let quasarDir: URL
   if (appDir) {
     srcDir = new URL('src/', appDir);
-    quasarDir = new URL('node_modules/quasar/', appDir);
+    quasarDir = new URL(await resolve('quasar/', import.meta.url));
     ({ appDir: cwd, cliDir } = await import('./app-urls.js'))
   } else {
     ({ appDir, cliDir, srcDir, quasarDir } = await import('./app-urls.js'))

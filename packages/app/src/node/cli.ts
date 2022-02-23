@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 import cac from 'cac'
 import { appDir as defaultAppDir, parsePath } from '../app-urls.js'
 import { printHttpServerUrls } from '../helpers/logger.js'
