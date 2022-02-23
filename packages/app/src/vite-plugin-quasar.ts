@@ -166,7 +166,7 @@ export const QuasarPlugin = async ({
               { find: 'quasar/vue-plugin', replacement: new URL('src/vue-plugin.js', quasarDir).pathname },
               { find: 'quasar/directives', replacement: new URL('src/directives.js', quasarDir).pathname },
               { find: 'quasar/src', replacement: new URL('src/', quasarDir).pathname },
-              { find: new RegExp('^quasar$'), replacement: new URL('node_modules/quasar/src/index.all.js', appDir).pathname },
+              { find: new RegExp('^quasar$'), replacement: new URL('src/index.all.js', quasarDir).pathname },
             ]
           },
           define: {

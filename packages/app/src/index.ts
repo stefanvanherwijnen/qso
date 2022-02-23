@@ -23,14 +23,19 @@ export const baseConfig = async ({
   let srcDir: URL
   let cwd: URL
   let quasarDir: URL
+  let vueDir: URL
+  let vueRouterDir: URL
   if (appDir) {
     srcDir = new URL('src/', appDir);
-    quasarDir = new URL(await resolve('quasar/', import.meta.url));
+    quasarDir = new URL(await resolve('quasar/', appDir.href));
     ({ appDir: cwd, cliDir } = await import('./app-urls.js'))
   } else {
     ({ appDir, cliDir, srcDir, quasarDir } = await import('./app-urls.js'))
     cwd = appDir
   }
+  vueDir = new URL('./', await resolve('vue', appDir.href));
+  vueRouterDir = new URL('../', await resolve('vue-router', appDir.href));
+
   if (!publicDir) publicDir = new URL('public/', appDir)
   /**
    * TODO:Perform some manual check if command is run inside a Quasar Project
@@ -130,8 +135,8 @@ export const baseConfig = async ({
         { find: 'cwd', replacement: cwd.pathname },
         { find: 'boot', replacement: new URL('boot/', srcDir).pathname },
         { find: 'assets', replacement: new URL('assets/', srcDir).pathname },
-        { find: 'vue', replacement: new URL('node_modules/vue', appDir).pathname },
-        { find: 'vue-router', replacement: new URL('node_modules/vue-router', appDir).pathname },
+        { find: 'vue', replacement: vueDir.pathname },
+        { find: 'vue-router', replacement: vueRouterDir.pathname },
         { find: '@qso/app', replacement: cliDir.pathname }
       ]
     },
