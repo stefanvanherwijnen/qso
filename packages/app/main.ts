@@ -16,16 +16,21 @@ interface ssrContext {
 
 export async function createApp (ssr?: 'client' | 'server', ssrContext?: ssrContext) {
   let app
-  if (ssr === 'server') {
-    app = createSSRApp(App)
-  } else if (ssr === 'client') {
-    app = createSSRApp(App)
-    app.mounted = () => {
-      const { proxy: { $q } } = getCurrentInstance()
-      $q.onSSRHydrated !== void 0 && $q.onSSRHydrated()
+  const RootComponent = {
+    name: 'AppWrapper',
+    setup (props) {
+      onMounted(() => {
+        const { proxy: { $q } } = getCurrentInstance()
+        $q.onSSRHydrated !== void 0 && $q.onSSRHydrated()
+      })
+
+      return () => h(App, props)
     }
+  }
+  if (ssr) {
+    app = createSSRApp(RootComponent)
   } else {
-    app = createVueApp(App)
+    app = createVueApp(RootComponent)
   }
   const router = createRouter()
   app.use(router)
