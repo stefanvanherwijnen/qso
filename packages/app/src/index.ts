@@ -78,6 +78,7 @@ export const baseConfig = async ({
             let entry: string
             switch (ssr) {
               case 'ssg':
+              case 'server':
               case 'client':
                 entry = new URL('ssr/entry-client.ts', cliDir).pathname
                 break;
@@ -141,6 +142,7 @@ export const baseConfig = async ({
       ]
     },
     build: {
+      target: (ssr === 'server') ? 'esnext' : 'modules',
       ssr: (ssr === 'server') ? true : false,
       ssrManifest: (ssr === 'client' || ssr === 'ssg'),
       rollupOptions: (ssr === 'server') ? {
@@ -149,9 +151,15 @@ export const baseConfig = async ({
           new URL('ssr/server.ts', cliDir).pathname
         ],
         output: {
+          minifyInternalExports: false,
           entryFileNames: '[name].mjs',
           chunkFileNames: '[name].mjs',
-          format: 'es'
+          format: 'es',
+          manualChunks: (id) => {
+            if (id.includes('fastify-ssr-plugin')) {
+              return 'fastify-ssr-plugin'
+            }
+          }
         }
       } : {
         output: {
@@ -165,6 +173,9 @@ export const baseConfig = async ({
       noExternal: [
         new RegExp(`^(?!.*(${builtinModules.join('|')}|fastify|express))`)
       ]
+    },
+    define: {
+      __BASE_URL__: `'/'`
     }
   } as UserConfig, viteConfig)
 }

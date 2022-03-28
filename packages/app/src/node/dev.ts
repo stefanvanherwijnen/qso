@@ -111,7 +111,7 @@ export async function createServer ({
         res.send(e.stack)
       }
     })
-    await app.listen(port || 3000, host === '' ? '0.0.0.0' : '127.0.0.1')
+    await app.listen(port || 3000, host)
     server = app.server
   } else {
     server = (await vite.listen()).httpServer as Server

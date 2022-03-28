@@ -50,10 +50,15 @@ export async function createApp (ssr?: 'client' | 'server', ssrContext?: ssrCont
     directives
   }, ssrContext)
 
-  if (ssrContext && ssrContext.provide) {
-    for (let key in ssrContext.provide) {
-      app.provide(key, ssrContext.provide[key])
-    }
+  let provide: Record<string, unknown> = {}
+  if (import.meta.env.SSR && ssrContext?.provide) {
+    provide = ssrContext?.provide
+  } else {
+    // @ts-ignore
+    provide = window.__INITIAL_STATE__?.provide
+  }
+  for (let key in provide) {
+    app.provide(key, provide[key])
   }
 
   for (let fn of Object.values(bootFunctions)) {

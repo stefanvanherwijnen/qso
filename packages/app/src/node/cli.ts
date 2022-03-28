@@ -87,6 +87,9 @@ cli.command('dev')
   .action(async (options) => {
     let server: Server
     let vite: ViteDevServer
+    if (options.host === true) {
+      options.host = '0.0.0.0'
+    }
     let { createServer } = await import('./dev.js')
     switch (options.mode) {
       case 'ssr':

@@ -58,6 +58,13 @@ export async function buildQuasar (opts: { ssr?: 'client' | 'server' | 'ssg', ba
     emptyOutDir: !!opts.outDir,
   }
 
+  if (opts.base) {
+    config.define = {
+      ...config.define,
+      __BASE_URL__: `'${opts.base}'`
+    }
+  }
+
   return build({
     configFile: false,
     base: opts.base,
