@@ -1,3 +1,5 @@
+# This project has moved on to [Vitrify](https://github.com/simsustech/vitrify).
+
 # Vite build tool for Quasar Framework
 
 Unofficial Vite build tool for Quasar Framework. Build and development server support for client-side- and server side rendering.
